@@ -1,0 +1,165 @@
+/* DLUM Drafting view — thème Wii/Sony 2000s */
+
+.draft-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  align-items: center;
+  margin-bottom: .75rem;
+}
+.draft-toolbar input[type=number],
+.draft-toolbar select {
+  background: rgba(4,10,30,0.8);
+  color: var(--fg);
+  border: 1px solid rgba(43,123,212,0.25);
+  border-radius: 10px;
+  padding: .25rem .45rem;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,.5);
+  font-family: inherit;
+  font-weight: 700;
+}
+.draft-toolbar label {
+  color: var(--muted);
+  font-size: .78rem;
+  font-weight: 700;
+  display: inline-flex;
+  gap: .35rem;
+  align-items: center;
+}
+
+.draft-wrap {
+  background: rgba(2,5,15,0.8);
+  border: 1px solid rgba(43,123,212,0.18);
+  border-radius: 12px;
+  padding: 12px;
+  overflow: auto;
+  box-shadow: inset 0 2px 12px rgba(0,0,0,.6);
+}
+
+.draft-grid {
+  display: grid;
+  grid-template-columns: 18px auto auto;
+  grid-auto-rows: auto;
+  gap: 4px;
+  width: max-content;
+  --cell: 18px;
+}
+
+.draft-grid .spacer { width: var(--cell); height: var(--cell); }
+
+.draft-grid .row.warp-colors,
+.draft-grid .row.threading,
+.draft-grid .row.drawdown {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 32), var(--cell));
+  gap: 1px;
+}
+.draft-grid .row.threading {
+  grid-template-rows: repeat(4, var(--cell));
+  grid-auto-flow: row;
+}
+.draft-grid .row.drawdown {
+  grid-template-rows: repeat(var(--picks), var(--cell));
+}
+.draft-grid .row.warp-colors { grid-template-rows: var(--cell); }
+
+.draft-grid .col.weft-colors {
+  display: grid;
+  grid-template-rows: repeat(var(--picks), var(--cell));
+  grid-template-columns: var(--cell);
+  gap: 1px;
+}
+
+.draft-grid .row.shaft-labels {
+  display: grid;
+  grid-template-rows: repeat(4, var(--cell));
+  grid-template-columns: var(--cell);
+  gap: 1px;
+}
+.draft-grid .row.shaft-labels .label {
+  font-size: 10px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  font-weight: 800;
+}
+
+.draft-grid .row.liftplan {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 4), var(--cell));
+  grid-template-rows: repeat(var(--picks), var(--cell));
+  gap: 1px;
+}
+
+.draft-grid .cell {
+  width: var(--cell);
+  height: var(--cell);
+  background: rgba(4,10,28,0.85);
+  border: 1px solid rgba(43,123,212,0.16);
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: all .1s;
+}
+.draft-grid .cell:hover { border-color: rgba(100,190,255,0.35); }
+.draft-grid .cell.color { border-color: rgba(43,123,212,0.25); }
+
+.draft-grid .threading-cell.on,
+.draft-grid .lift-cell.on {
+  background: linear-gradient(155deg, rgba(100,190,255,0.45) 0%, rgba(26,76,168,0.92) 100%);
+  border-color: rgba(120,200,255,0.55);
+  box-shadow: 0 0 6px rgba(43,123,212,0.5), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+.draft-grid .lift-cell.invalid {
+  border-color: rgba(224,53,53,0.45) !important;
+}
+
+.draft-legend {
+  margin-top: .75rem;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.color-swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.15);
+  cursor: pointer;
+  padding: 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,0.2);
+  transition: transform .12s, box-shadow .12s;
+}
+.color-swatch:hover { transform: scale(1.18); box-shadow: 0 4px 10px rgba(0,0,0,.6); }
+.color-swatch.active { border-color: rgba(255,255,255,0.7); transform: scale(1.15); box-shadow: 0 0 10px rgba(255,255,255,0.3); }
+  cursor: pointer;
+  box-sizing: border-box;
+}
+.draft-grid .cell.color { border-color: #444; }
+.draft-grid .threading-cell.on,
+.draft-grid .lift-cell.on {
+  background: #2B7BD4;
+  border-color: #4a9fe0;
+}
+.draft-grid .lift-cell.invalid {
+  border-color: var(--bad) !important;
+}
+
+.draft-legend {
+  margin-top: .75rem;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.color-swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+}
+.color-swatch.active { border-color: var(--fg); transform: scale(1.1); }

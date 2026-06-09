@@ -1,0 +1,2168 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DLUM — Digital Loom Upgrade Module</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/draft.css">
+<style>
+  :root {
+    --bg: #03060f;
+    --panel: rgba(8, 18, 45, 0.82);
+    --border: rgba(43, 123, 212, 0.22);
+    --fg: #d0e8ff;
+    --muted: #5a7aaa;
+    --accent: #2B7BD4;
+    --accent-light: #60b8ff;
+    --accent-dark: #1A5CA8;
+    --red: #E03535;
+    --yellow: #F5C400;
+    --good: #2B7BD4;
+    --bad: #E03535;
+    --warn: #F5C400;
+    --frame-up: #1A5CA8;
+    --frame-down: rgba(4, 10, 30, 0.8);
+    --r: 16px;
+    --r-sm: 10px;
+    --r-pill: 999px;
+  }
+  * { box-sizing: border-box; }
+
+  /* ═══ BODY : fond spatial ═══ */
+  body {
+    margin: 0; min-height: 100vh;
+    background:
+      radial-gradient(ellipse 90% 60% at 50% 5%, rgba(26,60,140,0.55) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(224,53,53,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 15% 90%, rgba(43,123,212,0.08) 0%, transparent 60%),
+      #03060f;
+    color: var(--fg);
+    font-family: 'Nunito', 'Segoe UI', system-ui, sans-serif;
+  }
+
+  /* ═══ HEADER ═══ */
+  header {
+    display: flex; align-items: center; gap: .9rem;
+    padding: .55rem 1.25rem;
+    background: linear-gradient(180deg, rgba(30,70,160,0.7) 0%, rgba(8,16,45,0.92) 100%);
+    border-bottom: 1px solid rgba(100,180,255,0.18);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 4px 30px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+  header .logo {
+    height: 38px; width: auto; image-rendering: pixelated;
+    filter: drop-shadow(0 0 10px rgba(43,123,212,0.6)) drop-shadow(0 0 4px rgba(96,184,255,0.4));
+  }
+  header h1 { font-size: 1rem; margin: 0; font-weight: 900; letter-spacing: .02em; }
+  header .grow { flex: 1; }
+
+  /* ═══ BADGE ═══ */
+  .badge {
+    display: inline-flex; align-items: center; gap: .35rem;
+    padding: .2rem .7rem; border-radius: var(--r-pill); font-size: .72rem; font-weight: 700;
+    background: rgba(4, 12, 35, 0.7);
+    border: 1px solid rgba(43,123,212,0.25);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 2px 10px rgba(0,0,0,0.4);
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+  .dot.ok   { background: #40b8ff; box-shadow: 0 0 8px #2B7BD4, 0 0 18px rgba(43,123,212,0.5); }
+  .dot.bad  { background: var(--bad);  box-shadow: 0 0 8px rgba(224,53,53,0.7); }
+  .dot.warn { background: var(--warn); box-shadow: 0 0 8px rgba(245,196,0,0.6); }
+
+  /* ═══ ONGLETS : bulles Wii/PS3 ═══ */
+  nav.tabs {
+    display: flex; gap: .4rem; padding: .65rem 1.25rem;
+    background: rgba(3, 8, 22, 0.75);
+    border-bottom: 1px solid rgba(43,123,212,0.14);
+    backdrop-filter: blur(10px);
+    overflow-x: auto;
+  }
+  nav.tabs button {
+    background: rgba(255,255,255,0.05);
+    color: var(--muted); border: 1px solid rgba(255,255,255,0.1);
+    padding: .38rem 1.05rem; border-radius: var(--r-pill); cursor: pointer;
+    font-size: .78rem; font-weight: 800; font-family: inherit; white-space: nowrap;
+    transition: all .18s; letter-spacing: .02em;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+  nav.tabs button.active {
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 55%),
+      linear-gradient(180deg, #4aa8f0 0%, #1a4aaa 100%);
+    color: #fff; border-color: rgba(100,190,255,0.4);
+    box-shadow:
+      0 0 18px rgba(43,123,212,0.55),
+      0 3px 10px rgba(0,0,0,0.4),
+      inset 0 1px 0 rgba(255,255,255,0.35);
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  }
+  nav.tabs button:hover:not(.active) {
+    color: #c0dcff; background: rgba(43,123,212,0.15);
+    border-color: rgba(43,123,212,0.3);
+  }
+
+  /* ═══ MAIN / PANELS ═══ */
+  main { padding: 1.1rem; max-width: 1100px; margin: 0 auto; }
+  .panel {
+    background: linear-gradient(145deg, rgba(26,60,130,0.12) 0%, rgba(3,8,24,0.88) 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--r); padding: 1.1rem 1.3rem; margin-bottom: 1rem;
+    box-shadow:
+      0 8px 32px rgba(0,0,0,0.5),
+      0 1px 0 rgba(255,255,255,0.06),
+      inset 0 1px 0 rgba(255,255,255,0.05);
+    backdrop-filter: blur(8px);
+  }
+  .panel h2 {
+    font-size: .72rem; text-transform: uppercase; letter-spacing: .12em; font-weight: 900;
+    margin: 0 0 .9rem; padding-bottom: .55rem;
+    background: linear-gradient(90deg, var(--accent-light) 0%, var(--yellow) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    border-bottom: 1px solid rgba(43,123,212,0.18);
+  }
+
+  /* ═══ CADRES ═══ */
+  .frames { display: grid; grid-template-columns: repeat(4, 1fr); gap: .75rem; }
+  .frame {
+    background: rgba(4, 10, 28, 0.75);
+    border: 1px solid rgba(43,123,212,0.2); border-radius: var(--r);
+    padding: .9rem; text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06);
+    transition: all .22s ease;
+  }
+  .frame.up {
+    background: linear-gradient(155deg, rgba(100,185,255,0.32) 0%, rgba(26,76,168,0.88) 100%);
+    border-color: rgba(100,190,255,0.5);
+    box-shadow: 0 0 28px rgba(43,123,212,0.65), 0 6px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.22);
+  }
+  .frame .label { font-size: .68rem; color: var(--muted); font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+  .frame.up .label { color: rgba(200,235,255,0.9); }
+  .frame .state { font-size: 1.3rem; font-weight: 900; margin-top: .2rem; }
+  .step-display { font-variant-numeric: tabular-nums; font-size: 2.2rem; font-weight: 900; color: var(--yellow); text-shadow: 0 0 20px rgba(245,196,0,0.55); }
+
+  /* ═══ BOUTONS pill glossy ═══ */
+  button.primary {
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 52%),
+      linear-gradient(180deg, #50b0ff 0%, #1848b8 100%);
+    color: #fff; border: 1px solid rgba(120,200,255,0.45);
+    padding: .48rem 1.15rem; border-radius: var(--r-pill); cursor: pointer;
+    font-size: .8rem; font-weight: 800; font-family: inherit; letter-spacing: .03em;
+    box-shadow: 0 4px 16px rgba(43,123,212,0.5), 0 1px 0 rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.38);
+    text-shadow: 0 1px 4px rgba(0,0,60,0.45); transition: all .15s;
+  }
+  button.primary:hover  { transform: translateY(-2px); box-shadow: 0 7px 22px rgba(43,123,212,0.65), inset 0 1px 0 rgba(255,255,255,0.38); filter: brightness(1.1); }
+  button.primary:active { transform: translateY(1px); box-shadow: 0 2px 6px rgba(43,123,212,0.4); filter: brightness(.93); }
+
+  button.danger {
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.28) 0%, transparent 52%),
+      linear-gradient(180deg, #ff7070 0%, #aa1010 100%);
+    color: #fff; border: 1px solid rgba(255,140,140,0.45);
+    padding: .48rem 1.15rem; border-radius: var(--r-pill); cursor: pointer;
+    font-size: .8rem; font-weight: 800; font-family: inherit; letter-spacing: .03em;
+    box-shadow: 0 4px 16px rgba(224,53,53,0.5), inset 0 1px 0 rgba(255,255,255,0.32);
+    text-shadow: 0 1px 4px rgba(60,0,0,0.4); transition: all .15s;
+  }
+  button.danger:hover  { transform: translateY(-2px); box-shadow: 0 7px 22px rgba(224,53,53,0.65), inset 0 1px 0 rgba(255,255,255,0.32); filter: brightness(1.1); }
+  button.danger:active { transform: translateY(1px); }
+
+  button.ghost {
+    background: rgba(255,255,255,0.06);
+    color: var(--fg); border: 1px solid rgba(255,255,255,0.12);
+    padding: .44rem 1rem; border-radius: var(--r-pill); cursor: pointer;
+    font-size: .78rem; font-weight: 700; font-family: inherit;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.07); transition: all .15s;
+  }
+  button.ghost:hover  { background: rgba(43,123,212,0.22); border-color: rgba(100,190,255,0.4); color: #fff; transform: translateY(-1px); }
+  button.ghost:active { transform: translateY(1px); }
+  button:disabled { opacity: .3; cursor: not-allowed; transform: none !important; filter: none !important; }
+
+  /* ═══ LAYOUT ═══ */
+  .controls { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; }
+  .toggle-row { display: grid; grid-template-columns: 80px 1fr; gap: 1rem; align-items: center; padding: .5rem 0; border-top: 1px solid rgba(43,123,212,0.1); }
+  .toggle-row:first-child { border-top: none; }
+  .toggle-row .name { color: var(--muted); font-size: .8rem; font-weight: 700; }
+
+  /* ═══ TOGGLE ═══ */
+  .switch { position: relative; display: inline-block; width: 52px; height: 28px; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider {
+    position: absolute; cursor: pointer; inset: 0;
+    background: rgba(3,8,24,0.8); border: 1px solid rgba(43,123,212,0.2); border-radius: var(--r-pill);
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.6); transition: .25s;
+  }
+  .slider:before {
+    position: absolute; content: ""; height: 22px; width: 22px; left: 2px; bottom: 2px;
+    background: linear-gradient(180deg, #b0d4ff 0%, #5090c0 100%);
+    border-radius: 50%; transition: .25s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.5);
+  }
+  input:checked + .slider { background: rgba(26,60,140,0.5); border-color: rgba(100,190,255,0.4); box-shadow: inset 0 2px 8px rgba(0,0,0,0.4), 0 0 12px rgba(43,123,212,0.3); }
+  input:checked + .slider:before { transform: translateX(24px); background: linear-gradient(180deg, #90d0ff 0%, #2B7BD4 100%); box-shadow: 0 0 12px rgba(43,123,212,0.8), inset 0 1px 0 rgba(255,255,255,0.5); }
+
+  /* ═══ ÉDITEUR DE MOTIF ═══ */
+  .editor { display: grid; gap: .5rem; }
+  .editor-toolbar { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; }
+  .editor-toolbar input[type=number] {
+    width: 70px; background: rgba(4,10,30,0.8); border: 1px solid rgba(43,123,212,0.25);
+    color: var(--fg); border-radius: var(--r-sm); padding: .3rem .4rem;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.5); font-family: inherit; font-weight: 700;
+  }
+  .grid { display: grid; gap: 4px; }
+  .grid-header, .grid-row { display: grid; grid-template-columns: 50px repeat(4, 1fr) 80px; gap: 4px; align-items: center; }
+  .grid-header { color: var(--muted); font-size: .7rem; padding: .25rem 0; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+  .grid-header > div { text-align: center; }
+  .row-num { color: var(--muted); font-size: .75rem; text-align: center; font-variant-numeric: tabular-nums; font-weight: 700; }
+  .cell {
+    aspect-ratio: 2/1; border: 1px solid rgba(43,123,212,0.18); background: rgba(4,10,28,0.85);
+    border-radius: 5px; cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+    transition: all .12s;
+  }
+  .cell:hover { border-color: rgba(100,190,255,0.35); }
+  .cell.on {
+    background: linear-gradient(155deg, rgba(100,190,255,0.45) 0%, rgba(26,76,168,0.92) 100%);
+    border-color: rgba(120,200,255,0.55);
+    box-shadow: 0 0 8px rgba(43,123,212,0.5), inset 0 1px 0 rgba(255,255,255,0.2);
+  }
+  .grid-row.invalid .cell { border-color: rgba(224,53,53,0.45); }
+  .grid-row.invalid .row-num { color: var(--bad); }
+  .row-info { font-size: .7rem; color: var(--muted); text-align: center; font-variant-numeric: tabular-nums; font-weight: 700; }
+  .row-info.bad { color: var(--bad); }
+
+  /* ═══ VUE PRODUCTION ═══ */
+  .prod-row { display: grid; grid-template-columns: 50px repeat(4, 1fr); gap: 4px; padding: 4px 0; }
+  .prod-row.current { background: rgba(43,123,212,0.14); border-radius: 6px; border-left: 3px solid rgba(100,190,255,0.7); }
+  .prod-row .cell { cursor: default; }
+
+  /* ═══ JOURNAL ═══ */
+  .log {
+    background: rgba(2,5,15,0.75); border: 1px solid rgba(43,123,212,0.15);
+    border-radius: var(--r-sm); padding: .5rem;
+    font-family: ui-monospace, "SF Mono", "Fira Code", monospace;
+    font-size: .7rem; max-height: 180px; overflow-y: auto; color: #4a6a90;
+    box-shadow: inset 0 2px 10px rgba(0,0,0,0.6);
+  }
+  .log .ev { padding: 1px 0; }
+  .log .ev.in  { color: #50b8ff; }
+  .log .ev.out { color: #a080ff; }
+  .log .ev.err { color: var(--bad); }
+
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ═══ CALIBRATION ═══ */
+  .cal-row { display: flex; align-items: center; gap: 4px; margin: 4px 0; }
+  .cal-lbl { min-width: 32px; color: var(--muted); font-size: .7rem; font-weight: 700; }
+  .cal-row .cal-btn { padding: 2px 6px !important; font-size: .7rem !important; min-width: 32px; }
+  .cal-row .cal-val { min-width: 38px; text-align: center; font-variant-numeric: tabular-nums; font-size: .8rem; color: var(--yellow); font-weight: 800; }
+  .cal-row .cal-test { margin-left: auto; padding: 2px 8px !important; font-size: .76rem !important; }
+
+  /* ═══ CHAMPS GLOBAUX ═══ */
+  input[type="number"]:not(.editor-toolbar *), input[type="text"], input[type="password"], select, textarea {
+    background: rgba(4,10,30,0.8); border: 1px solid rgba(43,123,212,0.25); color: var(--fg);
+    border-radius: var(--r-sm); padding: .3rem .5rem;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.5); font-family: inherit; font-weight: 600;
+    transition: border-color .15s;
+  }
+  input[type="number"]:not(.editor-toolbar *):focus, input[type="text"]:focus,
+  input[type="password"]:focus, select:focus, textarea:focus {
+    outline: none; border-color: rgba(100,190,255,0.55);
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.5), 0 0 0 3px rgba(43,123,212,0.18);
+  }
+  input[type="range"] { accent-color: var(--accent); }
+
+  @media (max-width: 720px) { #calibration-cards { grid-template-columns: 1fr !important; } }
+
+  /* ═══════════════════════════════════════════
+     THÈME CLAIR — Pixel Art (blanc/bleu/rouge/jaune)
+     ═══════════════════════════════════════════ */
+  html[data-theme="light"] {
+    --bg: #eef2fa;
+    --panel: #ffffff;
+    --border: #2B7BD4;
+    --fg: #06061e;
+    --muted: #3858a0;
+    --accent: #2B7BD4;
+    --accent-light: #4a9fe8;
+    --accent-dark: #1A5CA8;
+    --red: #E03535;
+    --yellow: #F5C400;
+    --good: #2B7BD4;
+    --bad: #E03535;
+    --warn: #c07800;
+    --frame-up: #2B7BD4;
+    --frame-down: #d4e4f8;
+    --r: 0px;
+    --r-sm: 0px;
+    --r-pill: 2px;
+  }
+  html[data-theme="light"] body {
+    background-color: #eef2fa;
+    background-image:
+      linear-gradient(rgba(43,123,212,.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(43,123,212,.07) 1px, transparent 1px);
+    background-size: 8px 8px;
+    font-family: 'Nunito', sans-serif;
+  }
+  html[data-theme="light"] header {
+    background: #ffffff;
+    border-bottom: 4px solid var(--yellow);
+    box-shadow: 0 4px 0 var(--accent);
+    backdrop-filter: none;
+  }
+  html[data-theme="light"] header .logo { filter: none; }
+  html[data-theme="light"] .badge {
+    background: #e4eeff;
+    border: 2px solid var(--accent);
+    border-radius: 2px;
+    color: var(--fg);
+    font-family: inherit;
+    box-shadow: 2px 2px 0 rgba(43,123,212,.3);
+  }
+  html[data-theme="light"] nav.tabs {
+    background: #d4e2f4;
+    border-bottom: 3px solid var(--accent);
+    backdrop-filter: none;
+  }
+  html[data-theme="light"] nav.tabs button {
+    background: #c4d4ec;
+    color: #304880;
+    border: 2px solid #80a8d4;
+    border-radius: 2px 2px 0 0;
+    top: 0;
+    box-shadow: none;
+    font-weight: 800;
+    transition: all .12s;
+  }
+  html[data-theme="light"] nav.tabs button.active {
+    background: var(--yellow);
+    color: #06061e;
+    border-color: #b08800;
+    border-bottom-color: var(--yellow);
+    box-shadow: 2px 0 0 rgba(0,0,0,.1);
+    text-shadow: none;
+  }
+  html[data-theme="light"] nav.tabs button:hover:not(.active) {
+    background: #d4e8ff;
+    color: var(--fg);
+    border-color: var(--accent);
+  }
+  html[data-theme="light"] main { max-width: 1100px; }
+  html[data-theme="light"] .panel {
+    background: #ffffff;
+    border: 3px solid var(--accent);
+    border-radius: 0;
+    box-shadow: 5px 5px 0 rgba(43,123,212,.28);
+    backdrop-filter: none;
+  }
+  html[data-theme="light"] .panel h2 {
+    background: var(--yellow);
+    -webkit-background-clip: unset; background-clip: unset;
+    -webkit-text-fill-color: #06061e; color: #06061e;
+    border-bottom: 2px solid var(--accent);
+    margin: -1.1rem -1.3rem .9rem;
+    padding: .58rem 1.3rem;
+    font-family: 'Press Start 2P', monospace;
+    font-size: .55rem;
+    letter-spacing: .05em;
+    border-radius: 0;
+  }
+  html[data-theme="light"] .frames { gap: .65rem; }
+  html[data-theme="light"] .frame {
+    background: #d4e4f8;
+    border: 3px solid var(--accent);
+    border-radius: 0;
+    box-shadow: 3px 3px 0 rgba(43,123,212,.3);
+  }
+  html[data-theme="light"] .frame.up {
+    background: var(--accent);
+    border-color: var(--accent-dark);
+    box-shadow: 3px 3px 0 var(--accent-dark);
+    color: #fff;
+  }
+  html[data-theme="light"] .frame .label { color: var(--muted); font-family: inherit; }
+  html[data-theme="light"] .frame.up .label { color: rgba(255,255,255,.9); }
+  html[data-theme="light"] .step-display { color: var(--red); text-shadow: 2px 2px 0 rgba(224,53,53,.2); }
+  html[data-theme="light"] button.primary {
+    background: var(--accent); color: #fff;
+    border: 2px solid var(--accent-dark); border-radius: 2px;
+    box-shadow: 3px 3px 0 var(--accent-dark);
+    text-shadow: none; transition: all .1s;
+  }
+  html[data-theme="light"] button.primary:hover { transform: translate(-1px,-2px); box-shadow: 5px 5px 0 var(--accent-dark); filter: brightness(1.06); }
+  html[data-theme="light"] button.primary:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--accent-dark); filter: none; }
+  html[data-theme="light"] button.danger {
+    background: var(--red); color: #fff;
+    border: 2px solid #a01818; border-radius: 2px;
+    box-shadow: 3px 3px 0 #a01818;
+    text-shadow: none; transition: all .1s;
+  }
+  html[data-theme="light"] button.danger:hover { transform: translate(-1px,-2px); box-shadow: 5px 5px 0 #a01818; filter: brightness(1.06); }
+  html[data-theme="light"] button.danger:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 #a01818; }
+  html[data-theme="light"] button.ghost {
+    background: #fff; color: var(--fg);
+    border: 2px solid var(--accent); border-radius: 2px;
+    box-shadow: 3px 3px 0 rgba(43,123,212,.3);
+    transition: all .1s;
+  }
+  html[data-theme="light"] button.ghost:hover { background: #e4eeff; transform: translate(-1px,-2px); box-shadow: 5px 5px 0 rgba(43,123,212,.3); color: var(--fg); }
+  html[data-theme="light"] button.ghost:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 rgba(43,123,212,.3); }
+  html[data-theme="light"] button:disabled { transform: none !important; box-shadow: 1px 1px 0 rgba(0,0,0,.1) !important; }
+  html[data-theme="light"] .toggle-row { border-top-color: #c4d4f0; }
+  html[data-theme="light"] .toggle-row .name { color: var(--muted); }
+  html[data-theme="light"] .slider { background: #c0d4f0; border-color: #80a8d4; border-radius: 999px; box-shadow: none; }
+  html[data-theme="light"] .slider:before { background: #fff; box-shadow: 1px 1px 3px rgba(0,0,0,.2); border: none; }
+  html[data-theme="light"] input:checked + .slider { background: #b0d0f8; border-color: var(--accent); }
+  html[data-theme="light"] input:checked + .slider:before { background: var(--accent); box-shadow: 0 0 6px rgba(43,123,212,.4); }
+  html[data-theme="light"] .log {
+    background: #f4f8ff; border: 2px solid #a8c4e4; border-radius: 2px;
+    color: #2848a0; box-shadow: inset 1px 1px 4px rgba(0,0,0,.05);
+    font-family: ui-monospace, monospace;
+  }
+  html[data-theme="light"] .log .ev.in  { color: var(--accent); }
+  html[data-theme="light"] .log .ev.out { color: #7030c0; }
+  html[data-theme="light"] .log .ev.err { color: var(--bad); }
+  html[data-theme="light"] .cell { background: #d4e4f8; border-color: #84acd4; border-radius: 0; box-shadow: none; }
+  html[data-theme="light"] .cell:hover { border-color: var(--accent); background: #c4d8f0; }
+  html[data-theme="light"] .cell.on { background: var(--accent); border-color: var(--accent-dark); box-shadow: none; }
+  html[data-theme="light"] .grid-header { color: var(--muted); }
+  html[data-theme="light"] .row-num { color: var(--muted); }
+  html[data-theme="light"] .prod-row.current { background: rgba(245,196,0,.22); border-left-color: var(--yellow); }
+  html[data-theme="light"] input[type="number"]:not(.editor-toolbar *),
+  html[data-theme="light"] input[type="text"],
+  html[data-theme="light"] input[type="password"],
+  html[data-theme="light"] select,
+  html[data-theme="light"] textarea {
+    background: #fff; border: 2px solid #84acd4; border-radius: 2px;
+    color: var(--fg); box-shadow: inset 1px 1px 3px rgba(0,0,0,.05);
+  }
+  html[data-theme="light"] input[type="number"]:not(.editor-toolbar *):focus,
+  html[data-theme="light"] input[type="text"]:focus,
+  html[data-theme="light"] input[type="password"]:focus,
+  html[data-theme="light"] select:focus,
+  html[data-theme="light"] textarea:focus { border-color: var(--accent); box-shadow: 2px 2px 0 rgba(43,123,212,.2); outline: none; }
+  /* Draft grid — thème clair */
+  html[data-theme="light"] .draft-wrap {
+    background: #f0f5ff; border: 2px solid var(--accent);
+    border-radius: 0; box-shadow: 4px 4px 0 rgba(43,123,212,.25);
+  }
+  html[data-theme="light"] .draft-toolbar input[type=number],
+  html[data-theme="light"] .draft-toolbar select {
+    background: #fff; border: 2px solid #84acd4; border-radius: 2px; box-shadow: none;
+    font-family: inherit; color: var(--fg);
+  }
+  html[data-theme="light"] .draft-toolbar label { color: var(--muted); }
+  html[data-theme="light"] .draft-grid .cell { background: #d4e4f8; border-color: #84acd4; }
+  html[data-theme="light"] .draft-grid .threading-cell.on,
+  html[data-theme="light"] .draft-grid .lift-cell.on { background: var(--accent); border-color: var(--accent-dark); box-shadow: none; }
+  html[data-theme="light"] .color-swatch { border-radius: 2px; border-color: rgba(0,0,0,.2); box-shadow: 2px 2px 0 rgba(0,0,0,.12); }
+  html[data-theme="light"] .color-swatch.active { border-color: #000; transform: scale(1.1); box-shadow: 3px 3px 0 rgba(0,0,0,.2); }
+  html[data-theme="light"] .draft-grid .row.shaft-labels .label { color: var(--muted); }
+
+  /* ═══════════════════════════════════════════
+     THÈME MUI 6 — Material Design 3 / Modern
+     ═══════════════════════════════════════════ */
+  html[data-theme="mui"] {
+    --bg: #f5f5f5;
+    --panel: #ffffff;
+    --border: rgba(0,0,0,0.12);
+    --fg: rgba(0,0,0,0.87);
+    --muted: rgba(0,0,0,0.6);
+    --accent: #1976d2;
+    --accent-light: #42a5f5;
+    --accent-dark: #1565c0;
+    --red: #d32f2f;
+    --yellow: #f9a825;
+    --good: #1976d2;
+    --bad: #d32f2f;
+    --warn: #ed6c02;
+    --frame-up: #1976d2;
+    --frame-down: #e3f2fd;
+    --r: 8px;
+    --r-sm: 6px;
+    --r-pill: 999px;
+  }
+  html[data-theme="mui"] body {
+    background: #f5f5f5;
+    font-family: 'Roboto', 'Segoe UI', system-ui, sans-serif;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+  html[data-theme="mui"] header {
+    background: #1976d2;
+    border-bottom: none;
+    box-shadow: 0 2px 4px -1px rgba(0,0,0,.2), 0 4px 5px 0 rgba(0,0,0,.14), 0 1px 10px 0 rgba(0,0,0,.12);
+    backdrop-filter: none;
+  }
+  html[data-theme="mui"] header .logo { filter: brightness(0) invert(1); }
+  html[data-theme="mui"] .badge {
+    background: rgba(255,255,255,0.15);
+    border: none; border-radius: 4px;
+    color: #fff; font-family: inherit;
+    box-shadow: none;
+  }
+  html[data-theme="mui"] .dot.ok   { background: #90caf9; box-shadow: none; }
+  html[data-theme="mui"] .dot.bad  { background: #ef9a9a; box-shadow: none; }
+  html[data-theme="mui"] .dot.warn { background: #ffcc02; box-shadow: none; }
+  html[data-theme="mui"] nav.tabs {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: none;
+    box-shadow: 0 1px 3px rgba(0,0,0,.08);
+  }
+  html[data-theme="mui"] nav.tabs button {
+    background: transparent; color: var(--muted);
+    border: none; border-bottom: 2px solid transparent;
+    border-radius: 0; padding: .6rem 1rem;
+    font-family: inherit; font-weight: 500;
+    font-size: .8rem; letter-spacing: .04em; text-transform: uppercase;
+    top: 0; transition: all .18s;
+    box-shadow: none;
+  }
+  html[data-theme="mui"] nav.tabs button.active {
+    color: #1976d2; border-bottom-color: #1976d2;
+    background: rgba(25,118,210,.06);
+    box-shadow: none; text-shadow: none;
+  }
+  html[data-theme="mui"] nav.tabs button:hover:not(.active) {
+    background: rgba(0,0,0,.04); color: var(--fg);
+  }
+  html[data-theme="mui"] .panel {
+    background: #fff;
+    border: none; border-radius: 8px;
+    box-shadow: 0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14), 0 1px 3px 0 rgba(0,0,0,.12);
+    backdrop-filter: none;
+  }
+  html[data-theme="mui"] .panel h2 {
+    background: none; -webkit-background-clip: unset; background-clip: unset;
+    -webkit-text-fill-color: var(--fg); color: var(--fg);
+    border-bottom: 1px solid var(--border);
+    margin: -1.1rem -1.3rem .9rem; padding: .72rem 1.3rem;
+    font-family: inherit; font-size: .7rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .08em;
+    border-radius: 8px 8px 0 0;
+  }
+  html[data-theme="mui"] .frames { gap: .75rem; }
+  html[data-theme="mui"] .frame {
+    background: #e3f2fd; border: 1px solid rgba(25,118,210,.2);
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.08);
+  }
+  html[data-theme="mui"] .frame.up {
+    background: linear-gradient(135deg, #42a5f5, #1565c0);
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(25,118,210,.4); color: #fff;
+  }
+  html[data-theme="mui"] .frame .label { color: var(--muted); font-family: inherit; letter-spacing: .03em; }
+  html[data-theme="mui"] .frame.up .label { color: rgba(255,255,255,.85); }
+  html[data-theme="mui"] .step-display { color: #1976d2; text-shadow: none; }
+  html[data-theme="mui"] button.primary {
+    background: #1976d2; color: #fff;
+    border: none; border-radius: 4px;
+    box-shadow: 0 3px 1px -2px rgba(0,0,0,.2), 0 2px 2px 0 rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12);
+    text-shadow: none; font-weight: 500; font-family: inherit; letter-spacing: .04em; text-transform: uppercase;
+    transition: background .15s, box-shadow .15s;
+  }
+  html[data-theme="mui"] button.primary:hover {
+    background: #1565c0; transform: none; filter: none;
+    box-shadow: 0 2px 4px -1px rgba(0,0,0,.2), 0 4px 5px 0 rgba(0,0,0,.14), 0 1px 10px 0 rgba(0,0,0,.12);
+  }
+  html[data-theme="mui"] button.primary:active { background: #0d47a1; transform: none; box-shadow: 0 5px 5px -3px rgba(0,0,0,.2), 0 8px 10px 1px rgba(0,0,0,.14), 0 3px 14px 2px rgba(0,0,0,.12); }
+  html[data-theme="mui"] button.danger {
+    background: #d32f2f; color: #fff;
+    border: none; border-radius: 4px;
+    box-shadow: 0 3px 1px -2px rgba(0,0,0,.2), 0 2px 2px 0 rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12);
+    text-shadow: none; font-weight: 500; font-family: inherit; letter-spacing: .04em; text-transform: uppercase;
+    transition: background .15s, box-shadow .15s;
+  }
+  html[data-theme="mui"] button.danger:hover { background: #b71c1c; transform: none; filter: none; box-shadow: 0 2px 4px -1px rgba(0,0,0,.2), 0 4px 5px 0 rgba(0,0,0,.14), 0 1px 10px 0 rgba(0,0,0,.12); }
+  html[data-theme="mui"] button.danger:active { transform: none; }
+  html[data-theme="mui"] button.ghost {
+    background: transparent; color: #1976d2;
+    border: 1px solid rgba(25,118,210,.5); border-radius: 4px;
+    box-shadow: none; font-weight: 500; font-family: inherit; letter-spacing: .04em; text-transform: uppercase;
+    transition: background .15s;
+  }
+  html[data-theme="mui"] button.ghost:hover { background: rgba(25,118,210,.06); color: #1976d2; border-color: #1976d2; transform: none; }
+  html[data-theme="mui"] button.ghost:active { transform: none; }
+  html[data-theme="mui"] button:disabled { transform: none !important; box-shadow: none !important; opacity: .38; }
+  html[data-theme="mui"] .toggle-row { border-top-color: var(--border); }
+  html[data-theme="mui"] .toggle-row .name { color: var(--muted); font-weight: 500; }
+  html[data-theme="mui"] .slider { background: rgba(0,0,0,.12); border: none; border-radius: 999px; box-shadow: none; }
+  html[data-theme="mui"] .slider:before { background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); border: none; }
+  html[data-theme="mui"] input:checked + .slider { background: rgba(25,118,210,.5); border: none; box-shadow: none; }
+  html[data-theme="mui"] input:checked + .slider:before { background: #1976d2; box-shadow: 0 1px 4px rgba(25,118,210,.5); }
+  html[data-theme="mui"] .log {
+    background: #fafafa; border: 1px solid var(--border); border-radius: 6px;
+    color: rgba(0,0,0,.6); box-shadow: none; font-family: 'Roboto Mono', monospace;
+  }
+  html[data-theme="mui"] .log .ev.in  { color: #1976d2; }
+  html[data-theme="mui"] .log .ev.out { color: #7b1fa2; }
+  html[data-theme="mui"] .log .ev.err { color: #d32f2f; }
+  html[data-theme="mui"] .cell { background: #e3f2fd; border-color: rgba(25,118,210,.2); border-radius: 3px; box-shadow: none; }
+  html[data-theme="mui"] .cell:hover { background: #bbdefb; border-color: rgba(25,118,210,.5); }
+  html[data-theme="mui"] .cell.on { background: #1976d2; border-color: #1565c0; box-shadow: none; }
+  html[data-theme="mui"] .grid-header { color: var(--muted); }
+  html[data-theme="mui"] .row-num { color: var(--muted); }
+  html[data-theme="mui"] .prod-row.current { background: rgba(25,118,210,.08); border-left-color: #1976d2; }
+  html[data-theme="mui"] input[type="number"]:not(.editor-toolbar *),
+  html[data-theme="mui"] input[type="text"],
+  html[data-theme="mui"] input[type="password"],
+  html[data-theme="mui"] select,
+  html[data-theme="mui"] textarea {
+    background: transparent; border: none; border-radius: 0;
+    border-bottom: 1px solid rgba(0,0,0,.42); color: var(--fg);
+    box-shadow: none; padding: .35rem .25rem; font-family: inherit; font-weight: 400;
+    transition: border-color .2s;
+  }
+  html[data-theme="mui"] input[type="number"]:not(.editor-toolbar *):focus,
+  html[data-theme="mui"] input[type="text"]:focus,
+  html[data-theme="mui"] input[type="password"]:focus,
+  html[data-theme="mui"] select:focus,
+  html[data-theme="mui"] textarea:focus {
+    outline: none; border-bottom: 2px solid #1976d2; box-shadow: none;
+  }
+  html[data-theme="mui"] input[type="range"] { accent-color: #1976d2; }
+  html[data-theme="mui"] .badge { color: rgba(255,255,255,.9); }
+  /* Boutons dans le header bleu MUI : forcer texte blanc */
+  html[data-theme="mui"] header button.ghost,
+  html[data-theme="mui"] header button.primary {
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    border-color: rgba(255,255,255,0.35);
+    text-transform: none;
+    box-shadow: none;
+  }
+  html[data-theme="mui"] header button.ghost:hover,
+  html[data-theme="mui"] header button.primary:hover {
+    background: rgba(255,255,255,0.25);
+    color: #fff;
+    transform: none;
+    box-shadow: none;
+  }
+  html[data-theme="mui"] .draft-wrap {
+    background: #fafafa; border: 1px solid var(--border);
+    border-radius: 8px; box-shadow: none;
+  }
+  html[data-theme="mui"] .draft-toolbar input[type=number],
+  html[data-theme="mui"] .draft-toolbar select {
+    background: transparent; border: none; border-bottom: 1px solid rgba(0,0,0,.42);
+    border-radius: 0; box-shadow: none; padding: .2rem .25rem;
+    font-family: inherit; color: var(--fg);
+  }
+  html[data-theme="mui"] .draft-toolbar label { color: var(--muted); font-weight: 400; }
+  html[data-theme="mui"] .draft-grid .cell { background: #e3f2fd; border-color: rgba(25,118,210,.2); border-radius: 2px; }
+  html[data-theme="mui"] .draft-grid .threading-cell.on,
+  html[data-theme="mui"] .draft-grid .lift-cell.on { background: #1976d2; border-color: #1565c0; box-shadow: none; }
+  html[data-theme="mui"] .color-swatch { border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,.2); border-color: rgba(0,0,0,.1); }
+  html[data-theme="mui"] .color-swatch.active { border-color: rgba(0,0,0,.6); box-shadow: 0 0 0 2px rgba(25,118,210,.4); }
+  html[data-theme="mui"] .draft-grid .row.shaft-labels .label { color: var(--muted); }
+</style>
+</head>
+<body>
+<script>(function(){
+  var t=localStorage.getItem('dlum-theme');
+  if(t==='light'||t==='mui') document.documentElement.setAttribute('data-theme',t);
+  // Fix absolute /static/ paths when opened as a local file (file:// protocol)
+  if(location.protocol==='file:'){
+    var l=document.querySelector('link[href="/static/draft.css"]');
+    if(l) l.href='./draft.css';
+  }
+})()</script>
+<header>
+  <img src="/static/DLUM.png" alt="DLUM" class="logo">
+  <span class="badge"><span class="dot" id="ws-dot"></span><span id="ws-text">WebSocket…</span></span>
+  <span class="badge"><span class="dot" id="mcu-dot"></span><span id="mcu-text">MCU…</span></span>
+  <div class="grow"></div>
+  <button class="ghost" id="theme-toggle-btn" title="Changer de thème" style="font-size:.75rem; min-width:80px;">☀️ Light</button>
+  <button class="ghost" id="ping-btn">Tester MCU</button>
+  <button class="ghost" id="rest-toggle-btn" title="Active/désactive le PWM des servos. En repos = silencieux, économe, plus de saccade.">
+    <span class="dot" id="rest-dot"></span>
+    <span id="rest-label">Repos / Actif</span>
+  </button>
+</header>
+
+<nav class="tabs">
+  <button class="active" data-view="monitor">État</button>
+  <button data-view="pilote">Pilotage</button>
+  <button data-view="editeur">Éditeur simple</button>
+  <button data-view="drafting">Plan de tissage</button>
+  <button data-view="production">Tissage</button>
+  <button data-view="preparation">Préparation</button>
+  <button data-view="settings">Réglages</button>
+  <button data-view="wifi">Réseau</button>
+</nav>
+
+<main>
+  <section class="view active" id="view-monitor">
+    <div class="panel">
+      <h2>État du métier</h2>
+      <div class="frames" id="monitor-frames"></div>
+      <div style="margin-top: 1rem; display: flex; gap: 2rem; align-items: baseline;">
+        <div><span class="step-display" id="monitor-step">0</span> <span style="color: var(--muted); font-size: .9rem;">duite</span></div>
+        <div><span id="monitor-raised" style="font-size: 1.2rem; font-weight: 600;">0</span> <span style="color: var(--muted); font-size: .9rem;">cadre(s) levé(s)</span></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>Journal d'événements</h2>
+      <div class="log" id="event-log"></div>
+    </div>
+  </section>
+
+  <section class="view" id="view-pilote">
+    <div class="panel">
+      <h2>Contrôle manuel</h2>
+      <div id="pilote-toggles"></div>
+      <div class="controls" style="margin-top: 1rem;">
+        <button class="primary" id="all-up-btn">Tout lever (4 cadres)</button>
+        <button class="danger" id="all-down-btn">Tout abaisser</button>
+        <button class="ghost" id="ping-btn-2">Rafraîchir l'état</button>
+      </div>
+      <p style="color:var(--muted); font-size:.75rem; margin-top:.5rem;">
+        ⚠️ "Tout lever" bypasse la sécurité 1–3 cadres. Réservé à la mise au point.
+      </p>
+    </div>
+    <div class="panel">
+      <h2>Levée libre (1 à 3 cadres)</h2>
+      <p style="color: var(--muted); font-size: .85rem;">Sélectionne un motif d'une seule étape et envoie-le directement.</p>
+      <div class="frames" id="pilote-quick"></div>
+      <div class="controls" style="margin-top: 1rem;">
+        <button class="primary" id="send-quick-btn">Envoyer la levée</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="view" id="view-editeur">
+    <div class="panel">
+      <h2>Éditeur de motif</h2>
+      <div class="editor-toolbar">
+        <label style="color:var(--muted);font-size:.85rem;">Lignes :
+          <input type="number" id="row-count" value="8" min="1" max="64">
+        </label>
+        <button class="ghost" id="apply-rows-btn">Appliquer</button>
+        <button class="ghost" id="clear-pattern-btn">Tout effacer</button>
+        <div class="grow" style="flex:1"></div>
+        <button class="ghost" id="export-btn">Exporter JSON</button>
+        <button class="ghost" id="import-btn">Importer JSON</button>
+        <button class="primary" id="load-pattern-btn">Charger pour tissage →</button>
+      </div>
+      <div class="grid" id="pattern-grid" style="margin-top: 1rem;"></div>
+      <p style="color: var(--muted); font-size: .8rem; margin-top: .75rem;" id="editor-help">
+        Chaque ligne doit lever 1 à N−1 cadres (jamais 0, jamais tous). Les lignes invalides sont en rouge.
+      </p>
+    </div>
+  </section>
+
+  <section class="view" id="view-settings">
+    <div class="panel">
+      <h2>Nombre de cadres</h2>
+      <p style="color:var(--muted); font-size:.85rem;">
+        Combien de cadres ton métier compte. Modifier cette valeur reconfigure
+        toute l'app (pilotage, motifs, calibration, mappage). Les motifs
+        existants restent compatibles si leur taille est ≤ au nouveau nombre.
+      </p>
+      <div style="display:flex; gap:1rem; align-items:center;">
+        <select id="frame-count-select" style="background:var(--bg); color:var(--fg); border:1px solid var(--border); border-radius:4px; padding:.4rem;">
+          <option value="2">2 cadres</option>
+          <option value="3">3 cadres</option>
+          <option value="4" selected>4 cadres</option>
+          <option value="5">5 cadres</option>
+          <option value="6">6 cadres</option>
+          <option value="7">7 cadres</option>
+          <option value="8">8 cadres</option>
+        </select>
+        <button class="primary" id="frame-count-save">Appliquer</button>
+        <span id="frame-count-status" style="color:var(--muted); font-size:.85rem;"></span>
+      </div>
+      <div style="color:var(--muted); font-size:.75rem; margin-top:.4rem;">
+        Pins physiques disponibles selon le nombre : D9, D10, D11, D12, D5, D6, D8, D3.
+        La sécurité métier devient « 1 à <em>N−1</em> cadres levés simultanément ».
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Tassage entre duites</h2>
+      <p style="color:var(--muted); font-size:.85rem;">
+        Délai pendant lequel <strong>tous les cadres descendent</strong> entre deux duites,
+        permettant de tasser la trame avec le peigne avant que le motif suivant ne se lève.
+      </p>
+      <div style="display:flex; align-items:center; gap:1rem; margin-top:.5rem;">
+        <input type="range" id="tassage-slider" min="0" max="6000" step="100" value="2500" style="flex:1;">
+        <div style="font-variant-numeric:tabular-nums; font-weight:600; min-width:80px;">
+          <span id="tassage-value">2500</span> ms
+        </div>
+        <button class="primary" id="tassage-save">Enregistrer</button>
+      </div>
+      <div style="color:var(--muted); font-size:.75rem; margin-top:.25rem;">
+        0 ms = pas de tassage (ancien comportement). Recommandé : 2000-3000 ms.
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Maintien des cadres en l'air</h2>
+      <p style="color:var(--muted); font-size:.85rem;">
+        Temps minimal pendant lequel les cadres restent levés après chaque duite.
+        En mode classique, la commande suivante est bloquée pendant ce délai.
+        En mode auto, ce délai s'applique aussi (en plus de l'intervalle auto si plus long).
+      </p>
+      <div style="display:flex; align-items:center; gap:1rem; margin-top:.5rem;">
+        <input type="range" id="lift-hold-slider" min="0" max="10000" step="100" value="2500" style="flex:1;">
+        <div style="font-variant-numeric:tabular-nums; font-weight:600; min-width:80px;">
+          <span id="lift-hold-value">2500</span> ms
+        </div>
+        <button class="primary" id="lift-hold-save">Enregistrer</button>
+      </div>
+      <div style="color:var(--muted); font-size:.75rem; margin-top:.25rem;">
+        Exemple : 2500 ms laisse le temps de passer la navette avant la duite suivante.
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Calibration servo (zéro et amplitude par cadre)</h2>
+      <p style="color:var(--muted); font-size:.85rem;">
+        Plage des servos : <strong>0° à 270°</strong>. Règle pour chaque cadre la position
+        <strong>basse</strong> (cadre relâché, navette passe pas) et la position <strong>haute</strong>
+        (cadre levé, foule ouverte). Bouton <strong>Test</strong> envoie le servo à cette position
+        immédiatement pour vérifier visuellement.
+      </p>
+      <div id="calibration-cards" style="display:grid; grid-template-columns:repeat(2, 1fr); gap:.5rem; margin-top:.75rem;"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Test matrice LED</h2>
+      <p style="color:var(--muted); font-size:.85rem;">
+        Allume toutes les LED de la matrice 12×8 du UNO Q pendant 1.5 s, puis revient
+        à l'affichage normal. Si tu ne vois rien s'allumer, le pilote LED est cassé
+        ou le MCU ne reçoit pas la commande.
+      </p>
+      <button class="primary" id="led-test-btn">⚡ Test LED matrix</button>
+      <button class="ghost" id="led-debug-btn" style="margin-left:.5rem;">🧭 Debug orientation (L lumineux 5s)</button>
+    </div>
+
+    <div class="panel">
+      <h2>Test physique des sorties</h2>
+      <p style="color:var(--muted); font-size:.85rem;">
+        Clique sur un bouton pour faire bouger le servo branché sur ce pin physique du MCU
+        (cycle haut → maintien 1s → bas). Note quel cadre physique bouge pour identifier
+        le câblage réel.
+      </p>
+      <div class="controls" id="pin-test-buttons" style="margin-top: .75rem; gap: 1rem;"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Mappage cadre logique → sortie physique</h2>
+      <p style="color:var(--muted); font-size:.85rem;">
+        Pour chaque cadre logique (utilisé partout dans l'UI : Plan de tissage, Tissage, Pilotage),
+        choisis sur quelle sortie physique du MCU il est câblé.
+        Le mappage doit être une <strong>permutation</strong> (chaque sortie utilisée une seule fois).
+      </p>
+      <div id="mapping-editor" style="margin-top: .75rem;"></div>
+      <div class="controls" style="margin-top: 1rem;">
+        <button class="primary" id="mapping-save-btn">Enregistrer le mappage</button>
+        <button class="ghost" id="mapping-reset-btn">Réinitialiser au défaut (1→D9, 2→D10, 3→D11, 4→D12)</button>
+      </div>
+      <div id="mapping-status" style="margin-top:.5rem; color:var(--muted); font-size:.85rem;"></div>
+    </div>
+  </section>
+
+  <section class="view" id="view-wifi">
+    <div class="panel">
+      <h2>État réseau</h2>
+      <div id="wifi-status" style="font-family: ui-monospace, monospace; color: var(--muted);">…</div>
+      <div class="controls" style="margin-top: 1rem;">
+        <button class="ghost" id="wifi-refresh-btn">Rafraîchir</button>
+        <button class="primary" id="wifi-hotspot-on-btn">Activer hotspot DLUM-Loom</button>
+        <button class="ghost" id="wifi-hotspot-off-btn">Désactiver hotspot</button>
+      </div>
+      <p style="color: var(--muted); font-size: .8rem; margin-top: .5rem;">
+        ⚠️ Activer le hotspot va déconnecter la carte de ton WiFi actuel.
+        Pour la rejoindre : SSID <strong>DLUM-Loom</strong> / mot de passe <strong>dlum1234</strong>,
+        puis ouvre <code>http://192.168.42.1:8000</code>.
+      </p>
+    </div>
+
+    <div class="panel">
+      <h2>Réseaux WiFi à proximité</h2>
+      <div class="controls" style="margin-bottom: .5rem;">
+        <button class="ghost" id="wifi-scan-btn">Scanner</button>
+      </div>
+      <div id="wifi-list">…</div>
+    </div>
+
+    <div id="wifi-connect-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:100; align-items:center; justify-content:center;">
+      <div class="panel" style="width:380px; max-width:90%;">
+        <h2>Se connecter à <span id="wifi-connect-ssid">…</span></h2>
+        <div style="margin: .75rem 0;">
+          <label style="color:var(--muted); font-size:.85rem;">Mot de passe</label>
+          <input type="password" id="wifi-connect-password" style="width:100%; background:var(--bg); border:1px solid var(--border); color:var(--fg); border-radius:4px; padding:.5rem; margin-top:.25rem;">
+          <label style="color:var(--muted); font-size:.75rem; display:block; margin-top:.4rem;"><input type="checkbox" id="wifi-connect-show"> Afficher</label>
+        </div>
+        <div class="controls" style="justify-content:flex-end;">
+          <button class="ghost" id="wifi-connect-cancel">Annuler</button>
+          <button class="primary" id="wifi-connect-submit">Se connecter</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="view" id="view-drafting">
+    <div class="panel">
+      <h2>Plan de tissage (remettage + plan de levée + aperçu tissu)</h2>
+      <div id="draft-container"></div>
+      <p style="color: var(--muted); font-size: .8rem; margin-top: .75rem;">
+        <strong>Remettage</strong> (haut) : assigne chaque fil de chaîne à un cadre (S1–S4).
+        <strong>Plan de levée</strong> (droite) : pour chaque duite (passage de trame), quels cadres lever (1 à 3 max).
+        <strong>Aperçu tissu</strong> (centre) : rendu live calculé depuis remettage + plan de levée + couleurs.
+        Charge un préréglage (toile, sergé…) pour démarrer, ou édite à la main puis "Envoyer au métier".
+      </p>
+      <div class="controls" style="margin-top:.75rem;">
+        <button class="primary" id="d-send-to-production">🪡 Envoyer au Tissage →</button>
+        <button class="ghost" id="d-send-to-prep">🧵 Envoyer à la Préparation →</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Bibliothèque de motifs</h2>
+      <p style="color:var(--muted); font-size:.85rem; margin:0 0 .5rem;">
+        Tes motifs sauvegardés apparaissent <strong>aussi dans le menu déroulant ↑</strong> (groupe "📚 Bibliothèque") :
+        sélectionne un motif là-haut et clique "Charger" comme pour les préréglages standard.
+        Le bouton "Charger" ci-dessous fait la même chose directement depuis la carte.
+      </p>
+      <div class="controls" style="margin-bottom:.75rem;">
+        <button class="primary" id="lib-save-btn">💾 Sauvegarder le motif courant comme preset</button>
+        <button class="ghost" id="lib-refresh-btn">Rafraîchir la liste</button>
+      </div>
+      <div id="lib-list" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:.5rem;">
+        <em style="color:var(--muted)">Aucun motif sauvegardé pour l'instant.</em>
+      </div>
+    </div>
+
+    <div id="lib-save-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:100; align-items:center; justify-content:center;">
+      <div class="panel" style="width:420px; max-width:90%;">
+        <h2>Sauvegarder ce motif</h2>
+        <label style="color:var(--muted); font-size:.85rem;">Nom</label>
+        <input type="text" id="lib-save-name" style="width:100%; background:var(--bg); border:1px solid var(--border); color:var(--fg); border-radius:4px; padding:.5rem; margin:.25rem 0 .75rem;" placeholder="Ex: Sergé 2/2 personnalisé">
+        <label style="color:var(--muted); font-size:.85rem;">Description (optionnel)</label>
+        <textarea id="lib-save-desc" rows="2" style="width:100%; background:var(--bg); border:1px solid var(--border); color:var(--fg); border-radius:4px; padding:.5rem; margin-top:.25rem; resize:vertical;"></textarea>
+        <div class="controls" style="justify-content:flex-end; margin-top:1rem;">
+          <button class="ghost" id="lib-save-cancel">Annuler</button>
+          <button class="primary" id="lib-save-confirm">Sauvegarder</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ VUE PRÉPARATION ═══════════════ -->
+  <section class="view" id="view-preparation">
+    <div class="panel" id="prep-idle-panel">
+      <h2>Préparation du métier</h2>
+      <p style="color:var(--muted); font-size:.9rem;">
+        Aucun plan de tissage chargé. Va dans <strong>Plan de tissage</strong> et clique
+        <em>"Envoyer à la Préparation"</em> pour démarrer le guidage fil par fil.
+      </p>
+    </div>
+
+    <div class="panel" id="prep-active-panel" style="display:none;">
+      <h2>Guidage de l'enfilage</h2>
+
+      <!-- Affichage principal : numéro de fil + cadre -->
+      <div style="display:flex; gap:1.5rem; align-items:stretch; margin-bottom:1.2rem; flex-wrap:wrap;">
+
+        <!-- Grande carte cadre -->
+        <div style="
+          flex:0 0 160px; text-align:center;
+          background:linear-gradient(155deg,rgba(100,185,255,.25) 0%,rgba(26,76,168,.85) 100%);
+          border:1px solid rgba(100,190,255,.4); border-radius:var(--r);
+          padding:1.2rem .5rem;
+          box-shadow:0 0 28px rgba(43,123,212,.55), inset 0 1px 0 rgba(255,255,255,.15);">
+          <div style="font-size:.65rem; font-weight:800; text-transform:uppercase; letter-spacing:.1em; color:rgba(200,235,255,.7); margin-bottom:.4rem;">Cadre</div>
+          <div id="prep-shaft-display" style="font-size:4rem; font-weight:900; color:#fff; line-height:1; text-shadow:0 0 20px rgba(100,200,255,.7);">–</div>
+        </div>
+
+        <!-- Info fil courant -->
+        <div style="flex:1; min-width:200px;">
+          <div style="margin-bottom:.6rem;">
+            <span style="color:var(--muted); font-size:.75rem; font-weight:800; text-transform:uppercase; letter-spacing:.08em;">Fil de chaîne</span>
+            <div style="display:flex; align-items:baseline; gap:.5rem; margin-top:.1rem;">
+              <span id="prep-end-current" style="font-size:2.4rem; font-weight:900; color:var(--yellow); line-height:1;">–</span>
+              <span style="color:var(--muted); font-size:1rem;">/</span>
+              <span id="prep-end-total" style="color:var(--muted); font-size:1rem; font-variant-numeric:tabular-nums;">–</span>
+            </div>
+          </div>
+          <!-- Barre de progression -->
+          <div style="background:rgba(0,0,0,.35); height:8px; border-radius:4px; overflow:hidden; margin-bottom:.8rem;">
+            <div id="prep-progress-bar" style="height:100%; background:linear-gradient(90deg,var(--accent),var(--accent-light)); width:0%; transition:width .3s; border-radius:4px;"></div>
+          </div>
+          <div id="prep-instruction" style="font-size:1rem; font-weight:700; color:var(--fg); padding:.55rem .9rem; background:rgba(43,123,212,.15); border:1px solid rgba(43,123,212,.3); border-radius:var(--r-sm); border-left:4px solid var(--accent);">–</div>
+        </div>
+      </div>
+
+      <!-- Contrôles navigation -->
+      <div class="controls" style="margin-bottom:.75rem;">
+        <button class="ghost" id="prep-prev-btn">← Fil précédent</button>
+        <button class="primary" id="prep-next-btn">Fil suivant →</button>
+        <button class="danger" id="prep-stop-btn">✕ Arrêter la préparation</button>
+      </div>
+      <p style="color:var(--muted); font-size:.78rem;">
+        Le bouton physique (pédale) branché sur <strong>D2</strong> avance également au fil suivant.
+      </p>
+    </div>
+
+    <!-- Résumé du plan de remettage -->
+    <div class="panel" id="prep-plan-panel" style="display:none;">
+      <h2>Plan de remettage complet</h2>
+      <div id="prep-plan-grid" style="display:flex; flex-wrap:wrap; gap:4px; font-size:.72rem; font-variant-numeric:tabular-nums;"></div>
+    </div>
+  </section>
+
+  <section class="view" id="view-production">
+    <div class="panel">
+      <h2>Tissage en cours</h2>
+      <div id="prod-summary" style="color: var(--muted); margin-bottom: 1rem;">Aucun motif chargé. Va dans <strong>Plan de tissage</strong> pour en charger un.</div>
+      <div class="prod-progress" id="prod-progress" style="display:none; margin-bottom: 1rem;">
+        <div style="display:flex; align-items:baseline; gap:1rem; margin-bottom:.5rem;">
+          <div><span id="prod-step-current" style="font-size:2.2rem; font-weight:700; color:var(--accent); font-variant-numeric:tabular-nums;">0</span><span style="color:var(--muted)"> / </span><span id="prod-step-total" style="color:var(--muted); font-variant-numeric:tabular-nums;">0</span></div>
+          <div style="color:var(--muted); font-size:.85rem;">duite courante</div>
+          <div style="margin-left:auto; color:var(--muted); font-size:.85rem;"><span id="prod-pct">0%</span> tissé</div>
+        </div>
+        <div style="background:#0a0d12; height:6px; border-radius:3px; overflow:hidden;">
+          <div id="prod-bar" style="height:100%; background:var(--accent); width:0%; transition:width .3s;"></div>
+        </div>
+      </div>
+      <div class="controls">
+        <button class="ghost" id="prev-step-btn">← Duite précédente</button>
+        <button class="primary" id="next-step-btn">Duite suivante →</button>
+        <button class="danger" id="stop-seq-btn">Arrêter (tout abaisser)</button>
+      </div>
+      <div class="controls" style="margin-top:.75rem; padding-top:.75rem; border-top:1px solid var(--border);">
+        <label style="color:var(--muted); font-size:.85rem;">Lecture auto :
+          <input type="number" id="auto-interval" min="1" max="60" value="5" style="width:60px; background:var(--bg); border:1px solid var(--border); color:var(--fg); border-radius:4px; padding:.25rem;">
+          s entre duites
+        </label>
+        <label style="color:var(--muted); font-size:.85rem;">Maintien haut :
+          <input type="number" id="auto-hold" min="0" max="20" step="0.1" value="2.5" style="width:70px; background:var(--bg); border:1px solid var(--border); color:var(--fg); border-radius:4px; padding:.25rem;">
+          s
+        </label>
+        <label style="color:var(--muted); font-size:.85rem;">Affichage LED :
+          <select id="led-display-select" style="background:var(--bg); border:1px solid var(--border); color:var(--fg); border-radius:4px; padding:.2rem .4rem; font-size:.85rem;">
+            <option value="pattern">Motif (drawdown)</option>
+            <option value="counter">Compteur (duite N/total)</option>
+          </select>
+        </label>
+        <label id="color-change-label" style="color:var(--muted); font-size:.85rem; display:flex; align-items:center; gap:.4rem; cursor:pointer;" title="Quand la couleur de trame change entre deux duites, les cadres descendent et l'écran affiche la nouvelle couleur puis un décompte 3-2-1 avant de reprendre.">
+          <input type="checkbox" id="color-change-enable" style="width:14px; height:14px; accent-color:var(--accent); cursor:pointer;">
+          Pause changement de couleur
+        </label>
+        <button class="primary" id="auto-start-btn">▶ Démarrer auto</button>
+        <button class="ghost" id="auto-pause-btn" disabled>⏸ Pause</button>
+        <button class="ghost" id="auto-stop-btn" disabled>⏹ Arrêter auto</button>
+        <span id="auto-status" style="color:var(--muted); font-size:.85rem;"></span>
+      </div>
+      <div id="prod-current-frames" style="margin-top:1rem; display:none;">
+        <div style="color:var(--muted); font-size:.8rem; margin-bottom:.4rem;">Cadres levés à cette duite :</div>
+        <div class="frames" id="prod-frames-display"></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>Aperçu du tissu</h2>
+      <div style="color:var(--muted); font-size:.8rem; margin-bottom:.5rem;">
+        Vue macro de l'ensemble du motif. La <strong style="color:var(--accent)">duite courante</strong> est surlignée.
+        Les duites tissées s'affichent en couleurs pleines, celles à venir sont grisées.
+      </div>
+      <div id="prod-drawdown-wrap" style="overflow:auto; max-height:60vh; background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:8px;">
+        <div id="prod-drawdown"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+let FRAME_COUNT = 4;
+let FRAME_COUNT_MAX = 8;
+let pattern = Array.from({length: 8}, () => Array(FRAME_COUNT).fill(0));
+let mcuState = { connected: false, step: 0, frames: [0,0,0,0] };
+let seqState = { active: false, index: 0, size: 0, auto: false, auto_paused: false };
+let ws = null;
+
+function el(id) { return document.getElementById(id); }
+
+function wsSend(obj) {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify(obj));
+    log("out", JSON.stringify(obj));
+  } else {
+    log("err", "WebSocket non connecté");
+  }
+}
+
+function log(kind, msg) {
+  const div = document.createElement("div");
+  div.className = "ev " + kind;
+  const t = new Date().toLocaleTimeString();
+  div.textContent = `[${t}] ${kind === "in" ? "←" : kind === "out" ? "→" : "!"} ${msg}`;
+  const log = el("event-log");
+  log.appendChild(div);
+  while (log.childElementCount > 100) log.removeChild(log.firstChild);
+  log.scrollTop = log.scrollHeight;
+}
+
+function setBadge(dotId, textId, ok, label) {
+  const dot = el(dotId);
+  dot.classList.remove("ok", "bad", "warn");
+  if (ok === true) dot.classList.add("ok");
+  else if (ok === false) dot.classList.add("bad");
+  else dot.classList.add("warn");
+  el(textId).textContent = label;
+}
+
+function renderRestToggle() {
+  const dot = el("rest-dot");
+  const label = el("rest-label");
+  const btn = el("rest-toggle-btn");
+  if (mcuState.rest) {
+    dot.classList.remove("ok"); dot.classList.add("warn");
+    label.textContent = "🛌 Repos (servos OFF)";
+    btn.style.background = "rgba(210, 153, 34, .15)";
+  } else {
+    dot.classList.remove("warn"); dot.classList.add("ok");
+    label.textContent = "⚡ Actif (servos ON)";
+    btn.style.background = "rgba(63, 185, 80, .15)";
+  }
+}
+
+function renderMonitor() {
+  const c = el("monitor-frames");
+  c.innerHTML = "";
+  for (let i = 0; i < FRAME_COUNT; i++) {
+    const up = mcuState.frames[i] === 1;
+    const div = document.createElement("div");
+    div.className = "frame" + (up ? " up" : "");
+    div.innerHTML = `<div class="label">Cadre ${i+1}</div><div class="state">${up ? "▲ HAUT" : "▽ BAS"}</div>`;
+    c.appendChild(div);
+  }
+  el("monitor-step").textContent = mcuState.step;
+  el("monitor-raised").textContent = mcuState.frames.reduce((a,b)=>a+b, 0);
+}
+
+let manualStates = [0,0,0,0];
+function renderPilote() {
+  const t = el("pilote-toggles");
+  t.innerHTML = "";
+  for (let i = 0; i < FRAME_COUNT; i++) {
+    const checked = manualStates[i] ? "checked" : "";
+    const row = document.createElement("div");
+    row.className = "toggle-row";
+    row.innerHTML = `
+      <div class="name">Cadre ${i+1}</div>
+      <label class="switch"><input type="checkbox" data-i="${i}" ${checked}><span class="slider"></span></label>
+    `;
+    t.appendChild(row);
+  }
+  t.querySelectorAll("input").forEach(inp => {
+    inp.addEventListener("change", e => {
+      const i = parseInt(e.target.dataset.i);
+      manualStates[i] = e.target.checked ? 1 : 0;
+      wsSend({ type: "manual", frame: i, state: manualStates[i] });
+    });
+  });
+
+  const q = el("pilote-quick");
+  q.innerHTML = "";
+  if (!quickFrames) quickFrames = [0,0,0,0];
+  for (let i = 0; i < FRAME_COUNT; i++) {
+    const up = quickFrames[i] === 1;
+    const div = document.createElement("div");
+    div.className = "frame" + (up ? " up" : "");
+    div.style.cursor = "pointer";
+    div.innerHTML = `<div class="label">Cadre ${i+1}</div><div class="state">${up ? "▲" : "▽"}</div>`;
+    div.addEventListener("click", () => {
+      quickFrames[i] = quickFrames[i] ? 0 : 1;
+      renderPilote();
+    });
+    q.appendChild(div);
+  }
+}
+let quickFrames = [0,0,0,0];
+
+function renderEditor() {
+  const grid = el("pattern-grid");
+  grid.innerHTML = "";
+  // Dynamic grid template based on FRAME_COUNT
+  const tpl = `50px repeat(${FRAME_COUNT}, 1fr) 80px`;
+  // Header
+  const header = document.createElement("div");
+  header.className = "grid-header";
+  header.style.gridTemplateColumns = tpl;
+  let hh = "<div></div>";
+  for (let i = 0; i < FRAME_COUNT; i++) hh += `<div>Cadre ${i+1}</div>`;
+  hh += "<div>Levés</div>";
+  header.innerHTML = hh;
+  grid.appendChild(header);
+  const maxRaised = FRAME_COUNT - 1;
+  pattern.forEach((row, idx) => {
+    const r = document.createElement("div");
+    r.className = "grid-row";
+    r.style.gridTemplateColumns = tpl;
+    const raised = row.reduce((a,b)=>a+b, 0);
+    const valid = raised >= 1 && raised <= maxRaised;
+    if (!valid) r.classList.add("invalid");
+    let html = `<div class="row-num">${idx+1}</div>`;
+    for (let i = 0; i < FRAME_COUNT; i++) {
+      html += `<div class="cell${row[i]?' on':''}" data-row="${idx}" data-col="${i}"></div>`;
+    }
+    html += `<div class="row-info${valid?'':' bad'}">${raised}/${maxRaised}</div>`;
+    r.innerHTML = html;
+    grid.appendChild(r);
+  });
+  grid.querySelectorAll(".cell").forEach(c => {
+    c.addEventListener("click", e => {
+      const r = parseInt(e.target.dataset.row);
+      const col = parseInt(e.target.dataset.col);
+      pattern[r][col] = pattern[r][col] ? 0 : 1;
+      // Toggle just this cell + update row validity — no full re-render
+      e.target.classList.toggle("on", !!pattern[r][col]);
+      const maxRaised = FRAME_COUNT - 1;
+      const raised = pattern[r].reduce((a, b) => a + b, 0);
+      const valid = raised >= 1 && raised <= maxRaised;
+      const rowEl = e.target.closest(".grid-row");
+      if (rowEl) {
+        rowEl.classList.toggle("invalid", !valid);
+        const info = rowEl.querySelector(".row-info");
+        if (info) { info.textContent = raised + "/" + maxRaised; info.classList.toggle("bad", !valid); }
+      }
+    });
+  });
+  el("editor-help").innerHTML = `Chaque ligne doit lever <strong>1 à ${maxRaised} cadres</strong> (jamais 0, jamais tous). Les lignes invalides sont en rouge.`;
+}
+
+// Loaded draft for production view (set by drafting tab when "Send to loom").
+// Falls back to a synthesized draft from `pattern` if user used simple editor.
+let prodDraft = null;
+const PROD_PALETTE = [
+  "#1a1a1a","#ffffff","#c0392b","#27ae60","#2980b9","#f39c12",
+  "#8e44ad","#16a085","#d35400","#7f8c8d","#e74c3c","#2ecc71",
+  "#3498db","#f1c40f","#9b59b6","#1abc9c",
+];
+
+function setProductionDraft(draft) {
+  // draft: {threading: [...], liftplan: [[...],...], warpColors: [...], weftColors: [...], ends, picks}
+  prodDraft = draft;
+  renderProduction();
+}
+
+function getEffectiveDraft() {
+  if (prodDraft) return prodDraft;
+  // Synthesize from simple editor pattern (only liftplan, dummy threading + colors)
+  const liftplan = pattern.filter(r => {
+    const s = r.reduce((a,b)=>a+b,0); return s >= 1 && s <= 3;
+  });
+  if (!liftplan.length) return null;
+  const ends = 32;
+  const threading = Array.from({length: ends}, (_, i) => i % FRAME_COUNT);
+  const warpColors = new Array(ends).fill(0);
+  const weftColors = new Array(liftplan.length).fill(1);
+  return { threading, liftplan, warpColors, weftColors, ends, picks: liftplan.length };
+}
+
+function renderProduction() {
+  const draft = getEffectiveDraft();
+  const drawdownEl = el("prod-drawdown");
+  drawdownEl.innerHTML = "";
+
+  if (!draft) {
+    el("prod-summary").innerHTML = "Aucun motif chargé. Va dans <strong>Plan de tissage</strong> pour en charger un.";
+    el("prod-progress").style.display = "none";
+    el("prod-current-frames").style.display = "none";
+    return;
+  }
+
+  const cur = Math.min(seqState.index, draft.picks - 1);
+  el("prod-summary").innerHTML = `Motif : <strong>${draft.picks}</strong> duites × <strong>${draft.ends}</strong> fils de chaîne`;
+  el("prod-step-current").textContent = (seqState.size > 0 ? cur + 1 : 0);
+  el("prod-step-total").textContent = draft.picks;
+  const pct = draft.picks > 0 ? Math.round((cur / draft.picks) * 100) : 0;
+  el("prod-pct").textContent = pct + "%";
+  el("prod-bar").style.width = pct + "%";
+  el("prod-progress").style.display = "";
+
+  // Render current pick frames preview
+  el("prod-current-frames").style.display = "";
+  const framesPanel = el("prod-frames-display");
+  framesPanel.innerHTML = "";
+  const curRow = draft.liftplan[cur] || [0,0,0,0];
+  for (let i = 0; i < FRAME_COUNT; i++) {
+    const up = curRow[i] === 1;
+    const div = document.createElement("div");
+    div.className = "frame" + (up ? " up" : "");
+    div.innerHTML = `<div class="label">Cadre ${i+1}</div><div class="state" style="font-size:1rem;">${up ? "▲" : "▽"}</div>`;
+    framesPanel.appendChild(div);
+  }
+
+  // Render full drawdown grid (P × W) with current pick highlighted
+  const W = draft.ends, P = draft.picks;
+  const cell = 14;
+  drawdownEl.style.display = "grid";
+  drawdownEl.style.gridTemplateColumns = `repeat(${W}, ${cell}px)`;
+  drawdownEl.style.gridAutoRows = `${cell}px`;
+  drawdownEl.style.gap = "1px";
+  drawdownEl.style.width = "max-content";
+
+  for (let p = 0; p < P; p++) {
+    const isCurrent = p === cur;
+    const isPast = p < cur;
+    for (let i = 0; i < W; i++) {
+      const shaft = draft.threading[i];
+      const up = (draft.liftplan[p] || [])[shaft] === 1;
+      const c = document.createElement("div");
+      c.style.width = cell + "px";
+      c.style.height = cell + "px";
+      const baseColor = PROD_PALETTE[up ? draft.warpColors[i] : draft.weftColors[p]] || "#888";
+      if (isCurrent) {
+        c.style.background = baseColor;
+        c.style.outline = "2px solid var(--accent)";
+        c.style.zIndex = "1";
+        c.style.position = "relative";
+      } else if (isPast) {
+        c.style.background = baseColor;
+      } else {
+        // future: faded
+        c.style.background = baseColor;
+        c.style.opacity = "0.25";
+      }
+      drawdownEl.appendChild(c);
+    }
+  }
+
+  // Auto-scroll to current pick
+  setTimeout(() => {
+    const wrap = el("prod-drawdown-wrap");
+    const targetY = cur * (cell + 1);
+    if (wrap.scrollHeight > wrap.clientHeight) {
+      wrap.scrollTop = Math.max(0, targetY - wrap.clientHeight / 2);
+    }
+  }, 50);
+}
+
+// WebSocket connect with auto-reconnect
+function connect() {
+  const proto = location.protocol === "https:" ? "wss" : "ws";
+  ws = new WebSocket(`${proto}://${location.host}/ws`);
+  ws.onopen = () => setBadge("ws-dot", "ws-text", true, "WebSocket OK");
+  ws.onclose = () => {
+    setBadge("ws-dot", "ws-text", false, "WebSocket déconnecté");
+    setTimeout(connect, 1500);
+  };
+  ws.onerror = () => log("err", "WebSocket erreur");
+  ws.onmessage = (e) => {
+    let m;
+    try { m = JSON.parse(e.data); } catch { return; }
+    log("in", e.data);
+    if (m.type === "hello" || m.type === "mcu_status") {
+      const c = m.connected ?? m.mcu?.connected;
+      setBadge("mcu-dot", "mcu-text", c, c ? `MCU sur ${m.port || mcuState.port || "COM"}` : "MCU déconnecté");
+      mcuState.connected = c;
+      if (m.mcu) Object.assign(mcuState, m.mcu);
+      mcuState.port = m.port || mcuState.port;
+      if (typeof m.frame_count === "number") applyFrameCount(m.frame_count);
+      if (typeof m.frame_count_max === "number") FRAME_COUNT_MAX = m.frame_count_max;
+      if (m.mapping) { motorMapping = m.mapping; renderSettings(); renderCalibration(); }
+      if (m.settings) {
+        runtimeSettings = m.settings;
+        if (m.settings.frame_count) applyFrameCount(m.settings.frame_count);
+        renderTassage();
+        renderLiftHold();
+        renderCalibration();
+      }
+      renderMonitor();
+    } else if (m.type === "mapping") {
+      motorMapping = m.data;
+      renderSettings();
+      renderCalibration();
+      el("mapping-status").style.color = "var(--good)";
+      el("mapping-status").textContent = m.ok === false ? "❌ mappage rejeté" : "✓ mappage actif";
+    } else if (m.type === "settings") {
+      runtimeSettings = m.data;
+      if (m.data.frame_count) applyFrameCount(m.data.frame_count);
+      renderTassage();
+      renderLiftHold();
+      renderCalibration();
+    } else if (m.type === "tassage") {
+      if (m.phase === "down") log("in", `Tassage en cours (${m.ms}ms)…`);
+      else if (m.phase === "lift") log("in", "Levée duite suivante");
+    } else if (m.type === "hold") {
+      log("in", `Maintien en l'air: encore ${Math.ceil((m.remaining_ms || 0) / 100) * 100}ms`);
+    } else if (m.type === "library_list") {
+      libraryRender(m.data);
+      if (draftEditor) draftEditor.setLibraryEntries(m.data);
+    } else if (m.type === "library_saved") {
+      log("in", `Motif "${m.data.name}" sauvegardé`);
+      wsSend({ type:"library_list" });
+    } else if (m.type === "library_deleted") {
+      wsSend({ type:"library_list" });
+    } else if (m.type === "prep_state") {
+      if (m.active) {
+        if (prepThreading.length === 0 && m.total > 0) {
+          // Reconstruct a dummy threading if loaded from another client
+          prepThreading = new Array(m.total).fill(0);
+        }
+        if (el("prep-plan-grid").childElementCount === 0 && prepThreading.length > 0) {
+          buildPrepPlanGrid(prepThreading);
+        }
+        renderPrepActive(m);
+      } else {
+        renderPrepIdle();
+        if (m.finished) log("in", "✅ Préparation terminée — tous les fils ont été enfilés !");
+      }
+    } else if (m.type === "library_entry" && m.data) {
+      // Apply the loaded entry to the current draft editor (auto-switch tab too)
+      document.querySelector('nav.tabs button[data-view="drafting"]').click();
+      ensureDraft().then(() => {
+        const d = m.data;
+        draftEditor.ends = d.ends || draftEditor.ends;
+        draftEditor.picks = d.picks || draftEditor.picks;
+        draftEditor.threading = d.threading.slice();
+        draftEditor.liftplan = d.liftplan.map(r => r.slice());
+        draftEditor.warpColors = d.warpColors.slice();
+        draftEditor.weftColors = d.weftColors.slice();
+        draftEditor._build();
+        log("in", `Motif "${d.name}" chargé`);
+      });
+    } else if (m.type === "mcu_event") {
+      const d = m.data;
+      if (d.evt === "state") {
+        mcuState.step = d.step ?? mcuState.step;
+        mcuState.frames = d.frames || mcuState.frames;
+        if ("rest" in d) {
+          mcuState.rest = !!d.rest;
+          renderRestToggle();
+        }
+        renderMonitor();
+      } else if (d.evt === "button") {
+        // Affichage seulement : c'est le backend qui déclenche next_step
+        // automatiquement (cf MCUBridge._handle_mcu_event). Surtout NE PAS
+        // ré-émettre next_step ici, sinon double avance.
+        log("in", "Bouton physique pressé");
+      } else if (d.evt === "error") {
+        log("err", `MCU error: ${d.code} ${d.requested ?? ""}`);
+      }
+    } else if (m.type === "sequencer") {
+      seqState = m;
+      renderProduction();
+      // Auto-play UI sync
+      if (m.auto) {
+        el("auto-start-btn").disabled = true;
+        el("auto-pause-btn").disabled = false;
+        el("auto-stop-btn").disabled = false;
+        if (m.auto_paused) {
+          el("auto-pause-btn").textContent = "▶ Reprendre";
+          el("auto-status").textContent = `⏸ auto en pause (${Math.round((m.auto_interval_ms||5000)/1000)}s)`;
+          el("auto-status").style.color = "var(--warn)";
+        } else {
+          el("auto-pause-btn").textContent = "⏸ Pause";
+          el("auto-status").textContent = `▶ auto en cours (${Math.round((m.auto_interval_ms||5000)/1000)}s)`;
+          el("auto-status").style.color = "var(--good)";
+        }
+      } else {
+        el("auto-start-btn").disabled = false;
+        el("auto-pause-btn").disabled = true;
+        el("auto-pause-btn").textContent = "⏸ Pause";
+        el("auto-stop-btn").disabled = true;
+        el("auto-status").textContent = "";
+      }
+      if (typeof m.lift_hold_ms === "number" && document.activeElement !== el("auto-hold")) {
+        el("auto-hold").value = (m.lift_hold_ms / 1000).toFixed(1).replace(/\.0$/, "");
+      }
+    } else if (m.type === "auto_play") {
+      // Already handled via sequencer broadcasts but log it
+      log("in", "auto-play " + (m.active ? "ON" : "OFF"));
+    } else if (m.type === "color_change") {
+      if (m.phase === "start") {
+        log("in", `🎨 Changement de couleur → ${m.color} (cadres en bas, LED décompte en cours…)`);
+        el("auto-status").textContent = `🎨 couleur ${m.color} — pause…`;
+        el("auto-status").style.color = "var(--warn)";
+      } else if (m.phase === "done") {
+        log("in", "🎨 Reprise du tissage");
+        // status will be reset by the next sequencer broadcast
+      }
+    } else if (m.type === "error") {
+      log("err", "Backend: " + (m.code || JSON.stringify(m)));
+    }
+  };
+}
+
+// Tab switching
+document.querySelectorAll("nav.tabs button").forEach(b => {
+  b.addEventListener("click", () => {
+    document.querySelectorAll("nav.tabs button").forEach(x => x.classList.remove("active"));
+    document.querySelectorAll(".view").forEach(x => x.classList.remove("active"));
+    b.classList.add("active");
+    el("view-" + b.dataset.view).classList.add("active");
+  });
+});
+
+// Buttons
+el("ping-btn").addEventListener("click", () => wsSend({ type: "ping_mcu" }));
+el("theme-toggle-btn").addEventListener("click", () => {
+  const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+  const next = cur === 'dark' ? 'light' : cur === 'light' ? 'mui' : 'dark';
+  const labels = { dark: '☀️ Light', light: '🎨 MUI6', mui: '🌙 Dark' };
+  if (next === 'dark') document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('dlum-theme', next);
+  el("theme-toggle-btn").textContent = labels[next];
+});
+// Init label
+(function(){
+  const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+  const labels = { dark: '☀️ Light', light: '🎨 MUI6', mui: '🌙 Dark' };
+  el("theme-toggle-btn").textContent = labels[cur];
+})();
+el("rest-toggle-btn").addEventListener("click", () => {
+  wsSend({ type: "set_rest", on: !mcuState.rest });
+});
+el("ping-btn-2").addEventListener("click", () => wsSend({ type: "ping_mcu" }));
+el("all-down-btn").addEventListener("click", () => {
+  manualStates = [0,0,0,0];
+  renderPilote();
+  wsSend({ type: "all_down" });
+});
+el("all-up-btn").addEventListener("click", () => {
+  if (!confirm("Lever les 4 cadres en même temps ?\nCeci bypasse la contrainte 1-3 (mode mise au point).")) return;
+  manualStates = [1,1,1,1];
+  renderPilote();
+  wsSend({ type: "all_up" });
+});
+el("send-quick-btn").addEventListener("click", () => {
+  const raised = quickFrames.reduce((a,b)=>a+b,0);
+  if (raised < 1 || raised > 3) {
+    log("err", `Levée invalide : ${raised} cadres (besoin 1–3)`);
+    return;
+  }
+  wsSend({ type: "lift", step: 0, frames: quickFrames });
+});
+el("apply-rows-btn").addEventListener("click", () => {
+  const n = Math.max(1, Math.min(64, parseInt(el("row-count").value) || 8));
+  if (n > pattern.length) {
+    while (pattern.length < n) pattern.push(Array(FRAME_COUNT).fill(0));
+  } else {
+    pattern.length = n;
+  }
+  renderEditor();
+});
+el("clear-pattern-btn").addEventListener("click", () => {
+  pattern = pattern.map(() => Array(FRAME_COUNT).fill(0));
+  renderEditor();
+});
+el("export-btn").addEventListener("click", () => {
+  const blob = new Blob([JSON.stringify(pattern, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "motif.json";
+  a.click();
+});
+el("import-btn").addEventListener("click", () => {
+  const inp = document.createElement("input");
+  inp.type = "file";
+  inp.accept = "application/json";
+  inp.onchange = () => {
+    const file = inp.files[0];
+    if (!file) return;
+    const r = new FileReader();
+    r.onload = () => {
+      try {
+        const p = JSON.parse(r.result);
+        if (Array.isArray(p) && p.every(row => Array.isArray(row))) {
+          pattern = p.map(row => row.slice(0, FRAME_COUNT).concat(Array(FRAME_COUNT).fill(0)).slice(0, FRAME_COUNT).map(x => x ? 1 : 0));
+          el("row-count").value = pattern.length;
+          renderEditor();
+        }
+      } catch (e) { log("err", "Import JSON invalide"); }
+    };
+    r.readAsText(file);
+  };
+  inp.click();
+});
+el("load-pattern-btn").addEventListener("click", () => {
+  // Synthesize a default straight threading for the simple editor
+  const threading = Array.from({length: 32}, (_, i) => i % FRAME_COUNT);
+  wsSend({ type: "load_pattern", pattern: pattern, threading });
+  document.querySelector('nav.tabs button[data-view="production"]').click();
+});
+el("next-step-btn").addEventListener("click", () => wsSend({ type: "next_step" }));
+el("prev-step-btn").addEventListener("click", () => wsSend({ type: "prev_step" }));
+el("stop-seq-btn").addEventListener("click", () => wsSend({ type: "stop_sequence" }));
+el("auto-start-btn").addEventListener("click", () => {
+  const sec = parseInt(el("auto-interval").value) || 5;
+  const holdSec = parseFloat(el("auto-hold").value);
+  if (!Number.isNaN(holdSec)) {
+    wsSend({ type: "set_setting", key: "lift_hold_ms", value: Math.max(0, Math.round(holdSec * 1000)) });
+  }
+  // Also save tassage_delay_ms from the settings slider so the user doesn't
+  // need to separately click "Enregistrer" before starting auto mode.
+  const tassageMs = parseInt(el("tassage-slider").value);
+  if (!Number.isNaN(tassageMs)) {
+    wsSend({ type: "set_setting", key: "tassage_delay_ms", value: Math.max(0, tassageMs) });
+  }
+  wsSend({ type: "auto_play_start", interval_ms: Math.max(1, sec) * 1000 });
+});
+el("auto-pause-btn").addEventListener("click", () => {
+  if (!seqState.auto) return;
+  wsSend({ type: seqState.auto_paused ? "auto_play_resume" : "auto_play_pause" });
+});
+el("auto-stop-btn").addEventListener("click", () => wsSend({ type: "auto_play_stop" }));
+// Save lift_hold_ms immediately when auto-hold field changes (takes effect on next pick)
+el("auto-hold").addEventListener("change", () => {
+  const holdSec = parseFloat(el("auto-hold").value);
+  if (!Number.isNaN(holdSec) && holdSec >= 0) {
+    wsSend({ type: "set_setting", key: "lift_hold_ms", value: Math.max(0, Math.round(holdSec * 1000)) });
+  }
+});
+// Save LED display mode immediately when changed
+el("led-display-select").addEventListener("change", () => {
+  wsSend({ type: "set_setting", key: "led_display_mode", value: el("led-display-select").value });
+});
+// Colour-change pause checkbox
+el("color-change-enable").addEventListener("change", () => {
+  wsSend({ type: "set_setting", key: "use_color_changes", value: el("color-change-enable").checked });
+});
+
+// --- WiFi tab ---
+async function wifiFetch(path, opts) {
+  const r = await fetch(path, opts);
+  return r.json();
+}
+
+async function refreshWifiStatus() {
+  const s = await wifiFetch("/api/wifi/status");
+  const modeBadge = s.mode === "hotspot" ? "🔥 HOTSPOT" : s.mode === "station" ? "📡 STATION" : "❌ OFF";
+  let html = `<div><strong>Mode :</strong> ${modeBadge}</div>`;
+  html += `<div><strong>Connexion :</strong> ${s.active_connection || "—"}</div>`;
+  html += `<div><strong>IP :</strong> ${s.ip4 || "—"}</div>`;
+  html += `<div style="margin-top:.5rem;"><strong>Profils sauvegardés :</strong></div>`;
+  if (s.saved && s.saved.length) {
+    html += "<ul style='margin:.25rem 0 0; padding-left:1.5rem;'>";
+    for (const p of s.saved) {
+      html += `<li>${p.name}${p.autoconnect ? " <em>(auto)</em>" : ""} `;
+      if (p.name !== "DLUM-Hotspot") {
+        html += `<button class="ghost" data-forget="${p.name}" style="padding:.1rem .4rem; font-size:.7rem;">oublier</button>`;
+      }
+      html += `</li>`;
+    }
+    html += "</ul>";
+  } else {
+    html += "<div style='color:var(--muted)'>aucun</div>";
+  }
+  el("wifi-status").innerHTML = html;
+  el("wifi-status").querySelectorAll("[data-forget]").forEach(b => {
+    b.addEventListener("click", async () => {
+      const name = b.dataset.forget;
+      if (!confirm(`Oublier le réseau "${name}" ?`)) return;
+      await wifiFetch("/api/wifi/forget", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({name}) });
+      refreshWifiStatus();
+    });
+  });
+}
+
+async function refreshWifiScan() {
+  el("wifi-list").innerHTML = "<em style='color:var(--muted)'>scan en cours…</em>";
+  const aps = await wifiFetch("/api/wifi/scan");
+  if (!aps.length) { el("wifi-list").innerHTML = "<em style='color:var(--muted)'>aucun réseau visible</em>"; return; }
+  let html = "<table style='width:100%; border-collapse:collapse;'>";
+  html += "<thead><tr style='color:var(--muted); font-size:.8rem; border-bottom:1px solid var(--border);'><th style='text-align:left; padding:.3rem;'>SSID</th><th>Sec</th><th>Signal</th><th></th></tr></thead><tbody>";
+  for (const ap of aps) {
+    const bars = "▂▄▆█".slice(0, Math.min(4, Math.ceil(ap.signal / 25)));
+    html += `<tr style="border-bottom:1px solid var(--border);">
+      <td style="padding:.4rem .3rem;"><strong>${ap.ssid}</strong>${ap.in_use?' ✓':''}</td>
+      <td style="padding:.4rem; font-size:.75rem; color:var(--muted);">${ap.security}</td>
+      <td style="padding:.4rem; font-family:monospace;">${bars} ${ap.signal}</td>
+      <td style="padding:.4rem; text-align:right;"><button class="primary" data-connect="${ap.ssid}" data-secure="${ap.security !== 'open' ? 1 : 0}" style="padding:.25rem .6rem; font-size:.8rem;">Connecter</button></td>
+    </tr>`;
+  }
+  html += "</tbody></table>";
+  el("wifi-list").innerHTML = html;
+  el("wifi-list").querySelectorAll("[data-connect]").forEach(b => {
+    b.addEventListener("click", () => openConnectModal(b.dataset.connect, b.dataset.secure === "1"));
+  });
+}
+
+function openConnectModal(ssid, secure) {
+  el("wifi-connect-ssid").textContent = ssid;
+  el("wifi-connect-password").value = "";
+  el("wifi-connect-password").style.display = secure ? "" : "none";
+  el("wifi-connect-modal").style.display = "flex";
+  el("wifi-connect-modal").dataset.ssid = ssid;
+  el("wifi-connect-modal").dataset.secure = secure ? "1" : "0";
+}
+
+el("wifi-connect-cancel").addEventListener("click", () => { el("wifi-connect-modal").style.display = "none"; });
+el("wifi-connect-show").addEventListener("change", e => { el("wifi-connect-password").type = e.target.checked ? "text" : "password"; });
+el("wifi-connect-submit").addEventListener("click", async () => {
+  const ssid = el("wifi-connect-modal").dataset.ssid;
+  const secure = el("wifi-connect-modal").dataset.secure === "1";
+  const password = secure ? el("wifi-connect-password").value : null;
+  el("wifi-connect-submit").disabled = true;
+  el("wifi-connect-submit").textContent = "Connexion…";
+  const res = await wifiFetch("/api/wifi/connect", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ssid, password}) });
+  el("wifi-connect-submit").disabled = false;
+  el("wifi-connect-submit").textContent = "Se connecter";
+  if (res.ok) {
+    el("wifi-connect-modal").style.display = "none";
+    setTimeout(refreshWifiStatus, 1500);
+  } else {
+    alert("Échec : " + (res.stderr || res.stdout || "inconnu"));
+  }
+});
+
+el("wifi-refresh-btn").addEventListener("click", refreshWifiStatus);
+el("wifi-scan-btn").addEventListener("click", refreshWifiScan);
+el("wifi-hotspot-on-btn").addEventListener("click", async () => {
+  if (!confirm("Activer le hotspot ?\n\nLa carte va se déconnecter de ton WiFi actuel.\nTu pourras la rejoindre via 'DLUM-Loom' / 'dlum1234'.")) return;
+  await wifiFetch("/api/wifi/hotspot", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({on:true}) });
+  setTimeout(refreshWifiStatus, 3000);
+});
+el("wifi-hotspot-off-btn").addEventListener("click", async () => {
+  await wifiFetch("/api/wifi/hotspot", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({on:false}) });
+  setTimeout(refreshWifiStatus, 2000);
+});
+
+// Auto-refresh wifi status when tab is opened
+document.querySelector('nav.tabs button[data-view="wifi"]').addEventListener("click", () => {
+  refreshWifiStatus();
+});
+
+// --- Settings tab : tassage, calibration, pin test, mapping ---
+let motorMapping = { logical_to_physical: [0,1,2,3], physical_labels: ["D9","D10","D11","D12"] };
+let runtimeSettings = { tassage_delay_ms: 2500, lift_hold_ms: 2500, down_angles: [30,30,30,30], up_angles: [130,130,130,130] };
+
+function renderTassage() {
+  const v = runtimeSettings.tassage_delay_ms ?? 2500;
+  el("tassage-slider").value = v;
+  el("tassage-value").textContent = v;
+}
+
+function renderLiftHold() {
+  const v = runtimeSettings.lift_hold_ms ?? 2500;
+  el("lift-hold-slider").value = v;
+  el("lift-hold-value").textContent = v;
+  if (el("auto-hold") && document.activeElement !== el("auto-hold")) {
+    el("auto-hold").value = (v / 1000).toFixed(1).replace(/\.0$/, "");
+  }
+  // Sync LED display select
+  if (el("led-display-select") && runtimeSettings.led_display_mode) {
+    el("led-display-select").value = runtimeSettings.led_display_mode;
+  }
+  // Sync colour-change checkbox
+  if (el("color-change-enable") && typeof runtimeSettings.use_color_changes !== "undefined") {
+    el("color-change-enable").checked = !!runtimeSettings.use_color_changes;
+  }
+}
+
+function renderCalibration() {
+  const cards = el("calibration-cards");
+  cards.innerHTML = "";
+  for (let logical = 0; logical < FRAME_COUNT; logical++) {
+    const phys = motorMapping.logical_to_physical[logical];
+    const physLabel = motorMapping.physical_labels[phys] || ("pin " + phys);
+    const downA = runtimeSettings.down_angles[phys] ?? 30;
+    const upA   = runtimeSettings.up_angles[phys] ?? 130;
+    const card = document.createElement("div");
+    card.className = "panel";
+    card.style.cssText = "padding: .75rem;";
+    card.innerHTML = `
+      <div style="display:flex; align-items:center; gap:.4rem; margin-bottom:.35rem;">
+        <h3 style="margin:0; font-size:.85rem; flex:1;">Cadre ${logical+1} <span style="color:var(--muted); font-weight:400; font-size:.75rem;">→ ${physLabel}</span></h3>
+        <button class="ghost cal-zero" data-m="${logical}" title="Envoyer servo à 0° (zéro mécanique absolu)" style="padding:2px 8px; font-size:.7rem;">⊘ 0°</button>
+        <button class="ghost cal-zero" data-m="${logical}" data-angle="135" title="Envoyer servo à 135° (milieu)" style="padding:2px 8px; font-size:.7rem;">◐ 135°</button>
+        <button class="ghost cal-zero" data-m="${logical}" data-angle="270" title="Envoyer servo à 270° (max)" style="padding:2px 8px; font-size:.7rem;">⏹ 270°</button>
+      </div>
+      <div class="cal-row">
+        <span class="cal-lbl">Bas</span>
+        <button class="ghost cal-btn" data-m="${logical}" data-k="down" data-step="-5">−5</button>
+        <button class="ghost cal-btn" data-m="${logical}" data-k="down" data-step="-1">−1</button>
+        <strong class="cal-val" id="cal-down-${logical}">${downA}°</strong>
+        <button class="ghost cal-btn" data-m="${logical}" data-k="down" data-step="+1">+1</button>
+        <button class="ghost cal-btn" data-m="${logical}" data-k="down" data-step="+5">+5</button>
+        <button class="primary cal-test" data-m="${logical}" data-k="down">▶</button>
+      </div>
+      <div class="cal-row">
+        <span class="cal-lbl">Haut</span>
+        <button class="ghost cal-btn" data-m="${logical}" data-k="up" data-step="-5">−5</button>
+        <button class="ghost cal-btn" data-m="${logical}" data-k="up" data-step="-1">−1</button>
+        <strong class="cal-val" id="cal-up-${logical}">${upA}°</strong>
+        <button class="ghost cal-btn" data-m="${logical}" data-k="up" data-step="+1">+1</button>
+        <button class="ghost cal-btn" data-m="${logical}" data-k="up" data-step="+5">+5</button>
+        <button class="primary cal-test" data-m="${logical}" data-k="up">▶</button>
+      </div>
+    `;
+    cards.appendChild(card);
+  }
+  // Wire +/- buttons
+  cards.querySelectorAll(".cal-btn").forEach(b => {
+    b.onclick = () => {
+      const logical = parseInt(b.dataset.m);
+      const phys = motorMapping.logical_to_physical[logical];
+      const kind = b.dataset.k;
+      const step = parseInt(b.dataset.step);
+      const arr = runtimeSettings[kind + "_angles"];
+      const cur = arr[phys] ?? (kind === "down" ? 30 : 130);
+      let next = cur + step;
+      if (next < 0) next = 0; if (next > 270) next = 270;
+      arr[phys] = next;
+      el(`cal-${kind}-${logical}`).textContent = next + "°";
+      // Persist + push to MCU
+      wsSend({ type: "set_motor_angle", motor: logical, kind: kind, value: next });
+      // Live preview
+      wsSend({ type: "live_servo", motor: phys, angle: next });
+    };
+  });
+  // Wire Test buttons
+  cards.querySelectorAll(".cal-test").forEach(b => {
+    b.onclick = () => {
+      const logical = parseInt(b.dataset.m);
+      const phys = motorMapping.logical_to_physical[logical];
+      const kind = b.dataset.k;
+      const arr = runtimeSettings[kind + "_angles"];
+      const angle = arr[phys] ?? (kind === "down" ? 30 : 130);
+      wsSend({ type: "live_servo", motor: phys, angle: angle });
+    };
+  });
+  // Wire Zero / 135 / 270 reference buttons
+  cards.querySelectorAll(".cal-zero").forEach(b => {
+    b.onclick = () => {
+      const logical = parseInt(b.dataset.m);
+      const phys = motorMapping.logical_to_physical[logical];
+      const angle = parseInt(b.dataset.angle || "0");
+      wsSend({ type: "live_servo", motor: phys, angle });
+    };
+  });
+}
+
+function applyFrameCount(n) {
+  n = Math.max(2, Math.min(FRAME_COUNT_MAX, n|0));
+  if (n === FRAME_COUNT) return;
+  FRAME_COUNT = n;
+  // Resize pattern rows to the new count
+  pattern = pattern.map(r => {
+    const out = r.slice(0, FRAME_COUNT);
+    while (out.length < FRAME_COUNT) out.push(0);
+    return out;
+  });
+  manualStates = new Array(FRAME_COUNT).fill(0);
+  quickFrames = new Array(FRAME_COUNT).fill(0);
+  // Re-render dependent views
+  renderMonitor();
+  renderPilote();
+  renderEditor();
+  renderProduction();
+  // Sync UI selector
+  const sel = el("frame-count-select");
+  if (sel) sel.value = String(n);
+  // Recreate draft editor with new shaft count if loaded
+  if (draftEditor) {
+    draftEditor = null;
+    if (document.getElementById("view-drafting").classList.contains("active")) {
+      ensureDraft();
+    }
+  }
+}
+
+el("frame-count-save").addEventListener("click", () => {
+  const v = parseInt(el("frame-count-select").value);
+  wsSend({ type: "set_setting", key: "frame_count", value: v });
+  el("frame-count-status").textContent = "Application en cours…";
+});
+
+el("led-test-btn").addEventListener("click", () => {
+  wsSend({ type: "led_test" });
+});
+el("led-debug-btn").addEventListener("click", () => {
+  wsSend({ type: "led_debug" });
+});
+
+el("tassage-slider").addEventListener("input", () => {
+  el("tassage-value").textContent = el("tassage-slider").value;
+});
+el("tassage-save").addEventListener("click", () => {
+  const v = parseInt(el("tassage-slider").value);
+  wsSend({ type: "set_setting", key: "tassage_delay_ms", value: v });
+});
+
+el("lift-hold-slider").addEventListener("input", () => {
+  el("lift-hold-value").textContent = el("lift-hold-slider").value;
+});
+el("lift-hold-save").addEventListener("click", () => {
+  const v = parseInt(el("lift-hold-slider").value);
+  wsSend({ type: "set_setting", key: "lift_hold_ms", value: v });
+});
+
+function renderSettings() {
+  // Pin test buttons
+  const pt = el("pin-test-buttons");
+  pt.innerHTML = "";
+  for (let i = 0; i < FRAME_COUNT; i++) {
+    const b = document.createElement("button");
+    b.className = "primary";
+    b.textContent = `Tester sortie ${motorMapping.physical_labels[i]} (pin ${i})`;
+    b.onclick = () => {
+      wsSend({ type: "pin_test", pin: i });
+    };
+    pt.appendChild(b);
+  }
+  // Mapping editor
+  const me = el("mapping-editor");
+  me.innerHTML = "";
+  for (let logical = 0; logical < FRAME_COUNT; logical++) {
+    const row = document.createElement("div");
+    row.style.cssText = "display:flex; align-items:center; gap:1rem; padding:.4rem 0; border-top:1px solid var(--border);";
+    const cur = motorMapping.logical_to_physical[logical];
+    let opts = "";
+    for (let p = 0; p < FRAME_COUNT; p++) {
+      opts += `<option value="${p}"${p===cur?' selected':''}>${motorMapping.physical_labels[p]} (pin ${p})</option>`;
+    }
+    row.innerHTML = `
+      <span style="min-width:90px;">Cadre <strong>${logical+1}</strong> →</span>
+      <select data-logical="${logical}" style="background:var(--bg); color:var(--fg); border:1px solid var(--border); border-radius:4px; padding:.35rem;">${opts}</select>
+    `;
+    me.appendChild(row);
+  }
+}
+
+el("mapping-save-btn").addEventListener("click", () => {
+  const sels = el("mapping-editor").querySelectorAll("select[data-logical]");
+  const m = new Array(FRAME_COUNT).fill(0);
+  sels.forEach(s => { m[parseInt(s.dataset.logical)] = parseInt(s.value); });
+  const expected = Array.from({length: FRAME_COUNT}, (_, i) => i);
+  const sorted = [...m].sort((a,b)=>a-b);
+  if (JSON.stringify(sorted) !== JSON.stringify(expected)) {
+    el("mapping-status").textContent = "⚠️ Doit être une permutation (chaque pin utilisé une seule fois).";
+    el("mapping-status").style.color = "var(--bad)";
+    return;
+  }
+  wsSend({ type: "set_mapping", logical_to_physical: m });
+});
+el("mapping-reset-btn").addEventListener("click", () => {
+  wsSend({ type: "reset_mapping" });
+});
+document.querySelector('nav.tabs button[data-view="settings"]').addEventListener("click", () => {
+  wsSend({ type: "get_mapping" });
+  wsSend({ type: "get_settings" });
+});
+
+// --- Library (linked to drafting) ---
+function libraryRender(items) {
+  const c = el("lib-list");
+  if (!items || !items.length) {
+    c.innerHTML = '<em style="color:var(--muted)">Aucun motif sauvegardé pour l\'instant.</em>';
+    return;
+  }
+  c.innerHTML = "";
+  for (const it of items) {
+    const card = document.createElement("div");
+    card.className = "panel";
+    card.style.cssText = "padding:.6rem; cursor:pointer;";
+    card.innerHTML = `
+      <div style="font-weight:600;">${it.name}</div>
+      <div style="color:var(--muted); font-size:.75rem; margin:.2rem 0;">${it.ends || 0} fils × ${it.picks || 0} duites</div>
+      <div style="color:var(--muted); font-size:.75rem; margin-bottom:.4rem;">${it.description || ""}</div>
+      <div class="controls" style="gap:.3rem;">
+        <button class="primary" data-load="${it.id}" style="padding:.2rem .5rem; font-size:.75rem;">Charger</button>
+        <button class="danger" data-del="${it.id}" style="padding:.2rem .5rem; font-size:.75rem;">Suppr.</button>
+      </div>
+    `;
+    c.appendChild(card);
+  }
+  c.querySelectorAll("[data-load]").forEach(b => b.onclick = () => wsSend({ type:"library_get", id:b.dataset.load }));
+  c.querySelectorAll("[data-del]").forEach(b => b.onclick = async () => {
+    if (!confirm("Supprimer ce motif ?")) return;
+    wsSend({ type:"library_delete", id:b.dataset.del });
+  });
+}
+
+el("lib-refresh-btn").addEventListener("click", () => wsSend({ type:"library_list" }));
+el("lib-save-btn").addEventListener("click", () => {
+  if (!draftEditor) { alert("Va d'abord dans Plan de tissage et édite un motif."); return; }
+  el("lib-save-name").value = "";
+  el("lib-save-desc").value = "";
+  el("lib-save-modal").style.display = "flex";
+});
+el("lib-save-cancel").addEventListener("click", () => el("lib-save-modal").style.display = "none");
+el("lib-save-confirm").addEventListener("click", () => {
+  const name = el("lib-save-name").value.trim();
+  if (!name) { alert("Donne un nom au motif."); return; }
+  const payload = {
+    name,
+    description: el("lib-save-desc").value.trim(),
+    threading: draftEditor.threading,
+    liftplan: draftEditor.liftplan,
+    warpColors: draftEditor.warpColors,
+    weftColors: draftEditor.weftColors,
+    ends: draftEditor.ends,
+    picks: draftEditor.picks,
+  };
+  wsSend({ type:"library_save", payload });
+  el("lib-save-modal").style.display = "none";
+});
+
+// --- Drafting tab (heavy module loaded on demand) ---
+let draftEditor = null;
+let prepThreading = [];  // threading stored for prep mode
+async function ensureDraft() {
+  if (draftEditor) return;
+  const _base = location.protocol === 'file:' ? '.' : '/static';
+  const mod = await import(`${_base}/draft.js`);
+  draftEditor = new mod.DraftEditor(el("draft-container"), {
+    shaftCount: FRAME_COUNT,
+    onLibraryLoad: (id) => wsSend({ type: "library_get", id }),
+    onSendLiftplan: (rows) => {
+      // Build weftColors aligned with the valid (filtered) rows
+      const weftColors = [];
+      let vi = 0;
+      for (let i = 0; i < draftEditor.liftplan.length && vi < rows.length; i++) {
+        const s = draftEditor.liftplan[i].reduce((a, b) => a + b, 0);
+        if (s >= 1 && s <= Math.max(1, draftEditor.shaftCount - 1)) {
+          weftColors.push(draftEditor.weftColors[i] ?? 1);
+          vi++;
+        }
+      }
+      wsSend({
+        type: "load_pattern",
+        pattern: rows,
+        threading: draftEditor.threading.slice(),
+        weftColors,
+      });
+      pattern = rows.map(r => r.slice());
+      el("row-count").value = pattern.length;
+      renderEditor();
+      // Pass full draft so production view can render the drawdown
+      setProductionDraft({
+        threading: draftEditor.threading.slice(),
+        liftplan: rows,
+        warpColors: draftEditor.warpColors.slice(),
+        weftColors: draftEditor.weftColors.slice().slice(0, rows.length),
+        ends: draftEditor.ends,
+        picks: rows.length,
+      });
+      document.querySelector('nav.tabs button[data-view="production"]').click();
+    }
+  });
+}
+document.querySelector('nav.tabs button[data-view="drafting"]').addEventListener("click", () => {
+  ensureDraft();
+  wsSend({ type:"library_list" });
+});
+
+// Bouton "Envoyer au Tissage" dans Plan de tissage
+el("d-send-to-production").addEventListener("click", () => {
+  ensureDraft().then(() => {
+    if (!draftEditor) return;
+    draftEditor._sendToLoom();
+  });
+});
+
+// Bouton "Envoyer à la Préparation" dans Plan de tissage
+el("d-send-to-prep").addEventListener("click", () => {
+  ensureDraft().then(() => {
+    if (!draftEditor) return;
+    prepThreading = draftEditor.threading.slice();
+    wsSend({ type: "prep_load", threading: prepThreading, end_count: draftEditor.ends });
+    document.querySelector('nav.tabs button[data-view="preparation"]').click();
+    // Démarrage local immédiat (fonctionne sans Pi)
+    _prepLocalStart(prepThreading);
+  });
+});
+
+// ─── État local préparation (fonctionne hors-ligne) ───
+let _prepLocal = null; // { threading, index }
+
+function _prepLocalStart(threading) {
+  _prepLocal = { threading: threading.slice(), index: 0 };
+  buildPrepPlanGrid(_prepLocal.threading);
+  _prepLocalRender();
+}
+function _prepLocalRender() {
+  if (!_prepLocal) return renderPrepIdle();
+  const { threading, index } = _prepLocal;
+  const total = threading.length;
+  if (index >= total) {
+    _prepLocal = null;
+    renderPrepIdle();
+    return;
+  }
+  const shaft = threading[index] + 1; // 0-indexed → 1-indexed
+  renderPrepActive({ shaft, end: index + 1, index, total });
+}
+
+// ─── Gestion de la vue Préparation ───
+function renderPrepIdle() {
+  el("prep-idle-panel").style.display = "";
+  el("prep-active-panel").style.display = "none";
+  el("prep-plan-panel").style.display = "none";
+}
+function renderPrepActive(state) {
+  el("prep-idle-panel").style.display = "none";
+  el("prep-active-panel").style.display = "";
+  el("prep-plan-panel").style.display = "";
+  el("prep-shaft-display").textContent = state.shaft;
+  el("prep-end-current").textContent = state.end;
+  el("prep-end-total").textContent = state.total;
+  const pct = state.total > 0 ? Math.round(100 * state.end / state.total) : 0;
+  el("prep-progress-bar").style.width = pct + "%";
+  el("prep-instruction").textContent =
+    `Passe le fil n°${state.end} dans le cadre ${state.shaft}`;
+  // Mettre en évidence le fil courant dans la grille
+  const cells = el("prep-plan-grid").querySelectorAll(".prep-cell");
+  cells.forEach((c, i) => {
+    c.style.outline = (i === state.index) ? '2px solid var(--yellow)' : 'none';
+    c.style.background = (i === state.index) ? 'var(--yellow)' : '';
+    c.style.color = (i === state.index) ? '#000' : '';
+    if (i === state.index) c.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  });
+}
+function buildPrepPlanGrid(threading) {
+  const grid = el("prep-plan-grid");
+  grid.innerHTML = "";
+  threading.forEach((shaft, i) => {
+    const c = document.createElement("div");
+    c.className = "prep-cell";
+    c.style.cssText = `
+      width:36px; height:36px; border-radius:var(--r-sm);
+      border:1px solid var(--border); display:flex; flex-direction:column;
+      align-items:center; justify-content:center; cursor:pointer;
+      background:rgba(43,123,212,.08); transition:background .12s;
+    `;
+    c.innerHTML = `<span style="font-size:.6rem;color:var(--muted);">${i+1}</span><strong style="font-size:.85rem;">C${shaft+1}</strong>`;
+    c.title = `Fil ${i+1} → Cadre ${shaft+1}`;
+    c.addEventListener("click", () => {
+      if (_prepLocal) { _prepLocal.index = i; _prepLocalRender(); }
+      wsSend({ type: "prep_load", threading: prepThreading, end_count: prepThreading.length });
+    });
+    grid.appendChild(c);
+  });
+}
+el("prep-prev-btn").addEventListener("click", () => {
+  if (_prepLocal && _prepLocal.index > 0) { _prepLocal.index--; _prepLocalRender(); }
+  wsSend({ type: "prep_prev" });
+});
+el("prep-next-btn").addEventListener("click", () => {
+  if (_prepLocal) { _prepLocal.index++; _prepLocalRender(); }
+  wsSend({ type: "prep_next" });
+});
+el("prep-stop-btn").addEventListener("click", () => {
+  _prepLocal = null;
+  renderPrepIdle();
+  wsSend({ type: "prep_stop" });
+});
+
+renderMonitor();
+renderRestToggle();
+renderPilote();
+renderEditor();
+renderProduction();
+connect();
+</script>
+</body>
+</html>

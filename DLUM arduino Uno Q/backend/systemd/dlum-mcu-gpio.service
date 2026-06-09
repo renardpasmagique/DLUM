@@ -1,0 +1,13 @@
+[Unit]
+Description=DLUM — keep MCU enable line high
+After=multi-user.target
+Conflicts=arduino-router.service arduino-router-serial.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/gpioset -c /dev/gpiochip1 37=0 70=1
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
