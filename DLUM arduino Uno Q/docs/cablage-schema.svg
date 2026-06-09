@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 760" font-family="ui-sans-serif, system-ui, Segoe UI, sans-serif">
+  <defs>
+    <style>
+      .panel { fill:#161b22; stroke:#30363d; stroke-width:1.5; rx:8; ry:8; }
+      .uno   { fill:#0d3a52; stroke:#3498db; stroke-width:2; rx:10; ry:10; }
+      .servo { fill:#1f3b1f; stroke:#27ae60; stroke-width:1.5; rx:4; ry:4; }
+      .alim  { fill:#3a1d1d; stroke:#e74c3c; stroke-width:1.5; rx:6; ry:6; }
+      .cap   { fill:#3b2a55; stroke:#9b59b6; stroke-width:1.5; rx:4; ry:4; }
+      .btn   { fill:#3b2f1d; stroke:#f39c12; stroke-width:1.5; rx:4; ry:4; }
+      .pin   { fill:#222; stroke:#666; stroke-width:0.8; }
+      .label { fill:#e6edf3; font-size:13px; }
+      .small { fill:#8b949e; font-size:11px; }
+      .pinlabel { fill:#fff; font-size:10px; font-weight:600; text-anchor:middle; }
+      .title { fill:#e6edf3; font-size:18px; font-weight:700; }
+      .sub   { fill:#8b949e; font-size:13px; }
+      .red   { stroke:#e74c3c; stroke-width:2.5; fill:none; }
+      .black { stroke:#444;     stroke-width:2.5; fill:none; }
+      .yellow{ stroke:#f1c40f; stroke-width:2.5; fill:none; }
+      .orange{ stroke:#e67e22; stroke-width:2.5; fill:none; }
+      .grey  { stroke:#888;    stroke-width:1.5; stroke-dasharray:4,3; fill:none; }
+      .annot { fill:#46d160; font-size:11px; font-style:italic; }
+    </style>
+
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#888"/>
+    </marker>
+  </defs>
+
+  <!-- ============== Background ============== -->
+  <rect width="1100" height="760" fill="#0e1116"/>
+
+  <!-- ============== Title ============== -->
+  <text x="550" y="32" text-anchor="middle" class="title">🧵 DLUM — Schéma de câblage v1</text>
+  <text x="550" y="52" text-anchor="middle" class="sub">4 servos sur D9/D10/D11/D12 + bouton externe sur D2 + alim 5 V dédiée pour les servos</text>
+
+  <!-- ============== USB-C source ============== -->
+  <g transform="translate(40, 100)">
+    <rect class="panel" width="170" height="80"/>
+    <text x="85" y="22" text-anchor="middle" class="label" font-weight="600">⚡ USB-C 5 V / 2 A</text>
+    <text x="85" y="42" text-anchor="middle" class="small">Chargeur ou PC</text>
+    <text x="85" y="58" text-anchor="middle" class="small">Alimente la carte UNO Q</text>
+    <text x="85" y="73" text-anchor="middle" class="small">(MCU + Linux)</text>
+  </g>
+  <!-- USB cable from source to UNO Q -->
+  <path d="M 210 140 L 320 140" class="grey" marker-end="url(#arrow)"/>
+  <text x="265" y="132" class="annot" text-anchor="middle">USB-C</text>
+
+  <!-- ============== External 5V PSU ============== -->
+  <g transform="translate(880, 100)">
+    <rect class="alim" width="180" height="100"/>
+    <text x="90" y="24" text-anchor="middle" class="label" font-weight="600">🔋 Alim 5–6 V externe</text>
+    <text x="90" y="42" text-anchor="middle" class="small">DÉDIÉE aux servos</text>
+    <text x="90" y="58" text-anchor="middle" class="small">≥ 1 A par servo</text>
+    <text x="90" y="74" text-anchor="middle" class="small">(BEC, alim labo, batterie 4×AA NiMH)</text>
+    <!-- Output terminals -->
+    <circle cx="40" cy="100" r="5" fill="#e74c3c"/>
+    <text x="40" y="118" class="pinlabel">+5V</text>
+    <circle cx="140" cy="100" r="5" fill="#444"/>
+    <text x="140" y="118" class="pinlabel">GND</text>
+  </g>
+
+  <!-- ============== UNO Q board ============== -->
+  <g transform="translate(320, 230)">
+    <rect class="uno" width="460" height="180"/>
+    <text x="230" y="28" text-anchor="middle" class="label" font-weight="700" font-size="16">Arduino UNO Q</text>
+    <text x="230" y="46" text-anchor="middle" class="small">MCU STM32U585 (Zephyr) + SoC Linux Debian 13</text>
+
+    <!-- LED matrix indicator on the board -->
+    <g transform="translate(180, 60)">
+      <rect width="100" height="60" fill="#1a1a3e" stroke="#3498db" stroke-width="0.5" rx="3"/>
+      <text x="50" y="14" text-anchor="middle" class="small" fill="#fff">Matrice LED 12×8</text>
+      <!-- some lit LEDs -->
+      <g fill="#3498db">
+        <circle cx="15" cy="30" r="2"/><circle cx="25" cy="30" r="2"/><circle cx="35" cy="30" r="2"/>
+        <circle cx="45" cy="30" r="2"/><circle cx="55" cy="30" r="2"/><circle cx="65" cy="30" r="2"/>
+        <circle cx="75" cy="30" r="2"/><circle cx="85" cy="30" r="2"/>
+        <circle cx="20" cy="40" r="2"/><circle cx="30" cy="40" r="2"/><circle cx="50" cy="40" r="2"/>
+        <circle cx="70" cy="40" r="2"/><circle cx="80" cy="40" r="2"/>
+      </g>
+    </g>
+
+    <!-- Top side: USB-C connector -->
+    <rect x="0" y="-15" width="50" height="20" fill="#444" stroke="#666" rx="3"/>
+    <text x="25" y="-2" text-anchor="middle" class="pinlabel" fill="#aaa">USB-C</text>
+
+    <!-- Right side: pin header (digital pins D2..D13 on the right edge) -->
+    <g transform="translate(420, 120)">
+      <text x="0" y="-10" class="small" fill="#fff">Header digital</text>
+      <!-- D9 -->
+      <rect class="pin" x="0" y="0" width="40" height="14"/>
+      <text x="20" y="11" class="pinlabel">D9</text>
+      <!-- D10 -->
+      <rect class="pin" x="0" y="20" width="40" height="14"/>
+      <text x="20" y="31" class="pinlabel">D10</text>
+      <!-- D11 -->
+      <rect class="pin" x="0" y="40" width="40" height="14"/>
+      <text x="20" y="51" class="pinlabel">D11</text>
+      <!-- D12 -->
+      <rect class="pin" x="0" y="60" width="40" height="14"/>
+      <text x="20" y="71" class="pinlabel">D12</text>
+    </g>
+
+    <!-- Left side: D2 + GND pins -->
+    <g transform="translate(0, 120)">
+      <text x="20" y="-10" class="small" fill="#fff" text-anchor="middle">Header</text>
+      <rect class="pin" x="0" y="0" width="40" height="14"/>
+      <text x="20" y="11" class="pinlabel">D2</text>
+      <rect class="pin" x="0" y="20" width="40" height="14"/>
+      <text x="20" y="31" class="pinlabel" fill="#46d160">GND</text>
+    </g>
+  </g>
+
+  <!-- ============== 4 Servos ============== -->
+  <g transform="translate(80, 510)">
+    <text x="0" y="-15" class="sub" font-weight="600">Servomoteurs (1 par cadre)</text>
+    <!-- Servo 1 (D9 = cadre 1) -->
+    <g transform="translate(0, 0)">
+      <rect class="servo" width="100" height="70"/>
+      <text x="50" y="22" text-anchor="middle" class="label" font-weight="600">Servo 1</text>
+      <text x="50" y="40" text-anchor="middle" class="small">Cadre 1</text>
+      <text x="50" y="55" text-anchor="middle" class="small">→ D9</text>
+      <!-- 3 wires -->
+      <circle cx="20" cy="70" r="3" fill="#e74c3c"/>
+      <circle cx="50" cy="70" r="3" fill="#444"/>
+      <circle cx="80" cy="70" r="3" fill="#f1c40f"/>
+    </g>
+    <!-- Servo 2 -->
+    <g transform="translate(150, 0)">
+      <rect class="servo" width="100" height="70"/>
+      <text x="50" y="22" text-anchor="middle" class="label" font-weight="600">Servo 2</text>
+      <text x="50" y="40" text-anchor="middle" class="small">Cadre 2</text>
+      <text x="50" y="55" text-anchor="middle" class="small">→ D10</text>
+      <circle cx="20" cy="70" r="3" fill="#e74c3c"/>
+      <circle cx="50" cy="70" r="3" fill="#444"/>
+      <circle cx="80" cy="70" r="3" fill="#f1c40f"/>
+    </g>
+    <!-- Servo 3 -->
+    <g transform="translate(300, 0)">
+      <rect class="servo" width="100" height="70"/>
+      <text x="50" y="22" text-anchor="middle" class="label" font-weight="600">Servo 3</text>
+      <text x="50" y="40" text-anchor="middle" class="small">Cadre 3</text>
+      <text x="50" y="55" text-anchor="middle" class="small">→ D11</text>
+      <circle cx="20" cy="70" r="3" fill="#e74c3c"/>
+      <circle cx="50" cy="70" r="3" fill="#444"/>
+      <circle cx="80" cy="70" r="3" fill="#f1c40f"/>
+    </g>
+    <!-- Servo 4 -->
+    <g transform="translate(450, 0)">
+      <rect class="servo" width="100" height="70"/>
+      <text x="50" y="22" text-anchor="middle" class="label" font-weight="600">Servo 4</text>
+      <text x="50" y="40" text-anchor="middle" class="small">Cadre 4</text>
+      <text x="50" y="55" text-anchor="middle" class="small">→ D12</text>
+      <circle cx="20" cy="70" r="3" fill="#e74c3c"/>
+      <circle cx="50" cy="70" r="3" fill="#444"/>
+      <circle cx="80" cy="70" r="3" fill="#f1c40f"/>
+    </g>
+  </g>
+
+  <!-- Wire color legend -->
+  <g transform="translate(50, 670)">
+    <text x="0" y="0" class="sub" font-weight="600">Code couleur fils servos :</text>
+    <circle cx="220" cy="-4" r="5" fill="#e74c3c"/><text x="232" y="0" class="small">+5 V (rouge)</text>
+    <circle cx="320" cy="-4" r="5" fill="#444"/><text x="332" y="0" class="small">GND (noir/brun)</text>
+    <circle cx="440" cy="-4" r="5" fill="#f1c40f"/><text x="452" y="0" class="small">Signal PWM (jaune/orange)</text>
+  </g>
+
+  <!-- ============== Common +5V rail ============== -->
+  <g transform="translate(80, 460)">
+    <rect class="cap" width="555" height="22"/>
+    <text x="277" y="16" text-anchor="middle" class="label" font-size="11">═══ Bus +5 V (rail commun, dominos/WAGO) ═══</text>
+  </g>
+  <!-- alim +5V to bus -->
+  <path d="M 920 200 L 920 415 L 360 415 L 360 460" class="red" marker-end="url(#arrow)"/>
+  <text x="700" y="408" class="annot">+5 V</text>
+
+  <!-- bus to each servo +5V (red dot) -->
+  <path d="M 100 482 L 100 580" class="red"/>
+  <path d="M 250 482 L 250 580" class="red"/>
+  <path d="M 400 482 L 400 580" class="red"/>
+  <path d="M 550 482 L 550 580" class="red"/>
+
+  <!-- ============== Common GND rail ============== -->
+  <g transform="translate(80, 690)">
+    <rect class="cap" width="555" height="22" fill="#1a1f29" stroke="#888"/>
+    <text x="277" y="16" text-anchor="middle" class="label" font-size="11">═══ Bus GND (rail commun — CRITIQUE : commun à TOUT) ═══</text>
+  </g>
+  <!-- alim GND to bus -->
+  <path d="M 1020 200 L 1020 700 L 635 700" class="black" marker-end="url(#arrow)"/>
+  <text x="850" y="693" class="annot">GND alim</text>
+
+  <!-- bus to servo GND (black dot) -->
+  <path d="M 130 580 L 130 690" class="black"/>
+  <path d="M 280 580 L 280 690" class="black"/>
+  <path d="M 430 580 L 430 690" class="black"/>
+  <path d="M 580 580 L 580 690" class="black"/>
+
+  <!-- UNO Q GND to common GND bus (CRITICAL) -->
+  <path d="M 340 384 L 340 690" class="black" marker-end="url(#arrow)"/>
+  <text x="295" y="640" class="annot" transform="rotate(-90 295 640)">⚠ GND commun</text>
+
+  <!-- Capacitor near servos -->
+  <g transform="translate(630, 540)">
+    <rect class="cap" width="80" height="40"/>
+    <text x="40" y="16" text-anchor="middle" class="small" fill="#fff">Condo 470 µF</text>
+    <text x="40" y="30" text-anchor="middle" class="small">10 V (proche servos)</text>
+    <text x="-3" y="58" class="pinlabel" fill="#e74c3c">+</text>
+    <text x="73" y="58" class="pinlabel" fill="#888">−</text>
+  </g>
+
+  <!-- ============== Signal wires (yellow) from UNO Q to servos ============== -->
+  <!-- D9 → servo 1 signal -->
+  <path d="M 780 350 L 870 350 L 870 600 L 160 600 L 160 580" class="yellow" marker-end="url(#arrow)"/>
+  <!-- D10 → servo 2 signal -->
+  <path d="M 780 370 L 855 370 L 855 605 L 310 605 L 310 580" class="yellow" marker-end="url(#arrow)"/>
+  <!-- D11 → servo 3 signal -->
+  <path d="M 780 390 L 840 390 L 840 610 L 460 610 L 460 580" class="yellow" marker-end="url(#arrow)"/>
+  <!-- D12 → servo 4 signal -->
+  <path d="M 780 410 L 825 410 L 825 615 L 610 615 L 610 580" class="yellow" marker-end="url(#arrow)"/>
+
+  <!-- Signal label -->
+  <text x="850" y="500" class="annot">Signaux PWM</text>
+  <text x="850" y="514" class="annot">D9..D12</text>
+
+  <!-- ============== Push button on D2 ============== -->
+  <g transform="translate(110, 430)">
+    <rect class="btn" width="120" height="60"/>
+    <text x="60" y="22" text-anchor="middle" class="label" font-weight="600">Bouton / pédale</text>
+    <text x="60" y="38" text-anchor="middle" class="small">Contact NO</text>
+    <text x="60" y="52" text-anchor="middle" class="small">(facultatif)</text>
+  </g>
+  <!-- D2 to button (orange) -->
+  <path d="M 320 350 L 230 350 L 230 460" class="orange" marker-end="url(#arrow)"/>
+  <text x="245" y="345" class="annot">D2</text>
+  <!-- button to GND -->
+  <path d="M 170 490 L 170 690" class="black" marker-end="url(#arrow)"/>
+
+  <!-- ============== Annotations / warnings ============== -->
+  <g transform="translate(810, 330)">
+    <rect width="270" height="115" fill="#3a1f1f" stroke="#e74c3c" stroke-width="1" rx="6"/>
+    <text x="135" y="22" text-anchor="middle" fill="#fff" font-weight="700" font-size="13">⚠ Points critiques</text>
+    <text x="12" y="42" class="small" fill="#fff">• GND commun obligatoire entre alim</text>
+    <text x="20" y="56" class="small" fill="#fff">  externe et UNO Q</text>
+    <text x="12" y="74" class="small" fill="#fff">• Ne PAS alimenter servos via USB</text>
+    <text x="20" y="88" class="small" fill="#fff">  de la carte (brown-out garanti)</text>
+    <text x="12" y="106" class="small" fill="#fff">• Condensateur côté servos (pics)</text>
+  </g>
+</svg>

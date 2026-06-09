@@ -1,0 +1,27 @@
+{
+  "tassage_delay_ms": 2500,
+  "lift_hold_ms": 2500,
+  "frame_count": 4,
+  "down_angles": [
+    30,
+    30,
+    30,
+    30,
+    30,
+    30,
+    30,
+    30
+  ],
+  "up_angles": [
+    130,
+    130,
+    130,
+    130,
+    130,
+    130,
+    130,
+    130
+  ],
+  "led_display_mode": "counter",
+  "use_color_changes": false
+}

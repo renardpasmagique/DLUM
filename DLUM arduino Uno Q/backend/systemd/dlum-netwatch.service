@@ -1,0 +1,17 @@
+[Unit]
+Description=DLUM — Network watchdog (auto-fallback to hotspot)
+After=network.target NetworkManager.service
+Wants=NetworkManager.service
+
+[Service]
+Type=simple
+User=arduino
+Group=arduino
+ExecStart=/usr/bin/python3 /home/arduino/dlum/dlum_netwatch.py
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

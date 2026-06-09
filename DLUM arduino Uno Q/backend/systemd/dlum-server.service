@@ -1,0 +1,22 @@
+[Unit]
+Description=DLUM — Web UI + serial bridge
+After=network-online.target dlum-mcu-gpio.service
+Wants=network-online.target
+Requires=dlum-mcu-gpio.service
+
+[Service]
+Type=simple
+User=arduino
+Group=arduino
+WorkingDirectory=/home/arduino/dlum
+Environment=DLUM_SERIAL_PORT=/dev/ttyHS1
+Environment=DLUM_HOST=0.0.0.0
+Environment=DLUM_PORT=8000
+ExecStart=/usr/bin/python3 /home/arduino/dlum/dlum_server.py
+Restart=always
+RestartSec=3
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
